@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101418" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Florida: Bills in Miami">
+<meta name="trip-version" content="2026-11-23T23:08:26.756Z">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Florida: Bills in Miami</title>
+<style>:root{--bg:#f4f6f8;--fg:#15202b;--muted:#5b6770;--card:#fff;--line:#d9dfe4;--sea:#dcebf5;--land:#e9efe3;--land-on:#cfe3c4;--coast:#6f8f5f;--accent:#0b6e8f;--chip:#eef2f5;--warn:#9a5b00;--warnbg:#fff2dc;--bad:#a1271b;--badbg:#fde6e3;--sec:#4b4f9a;--secbg:#e8e9fb;--ok:#1f7a3a;--okbg:#e2f5e7;--shadow:0 6px 24px rgba(0,0,0,.18);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#101418;--fg:#e6edf3;--muted:#9aa7b2;--card:#1a2129;--line:#2d3742;--sea:#0f2533;--land:#26302a;--land-on:#2f4430;--coast:#7fa36d;--accent:#5cc3e6;--chip:#242d36;--warn:#ffc46b;--warnbg:#3a2a0c;--bad:#ff8a7d;--badbg:#3d1714;--sec:#b8bbff;--secbg:#23264a;--ok:#7ad68f;--okbg:#14301c;--shadow:0 6px 24px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow-x:hidden;touch-action:manipulation}
+a{color:var(--accent);overflow-wrap:anywhere}
+h1{font-size:1.5rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.25rem;margin:.2em 0 .5em}
+h3{font-size:1.05rem;margin:0}
+h4{font-size:.95rem;margin:.8em 0 .3em}
+.top{padding:12px 16px 6px}
+.sub{margin:.2em 0;color:var(--muted)}
+.meta{margin:.2em 0;font-weight:600}
+.checked{font-size:.8rem;color:var(--muted);margin:.4em 0}
+.mapwrap{position:relative;margin:0 8px;height:min(50vh,560px);min-height:220px;border-radius:14px;overflow:hidden;background:var(--sea);border:1px solid var(--line)}
+#map{display:block;width:100%;height:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:grab;--s:1}
+#map:focus,#map *:focus{outline:none}
+#map .stop:focus-visible circle{stroke:var(--fg);stroke-width:calc(3px * var(--s))}
+.sea{fill:var(--sea)}
+.land path{fill:var(--land);stroke:var(--coast);stroke-width:calc(.6px * var(--s));stroke-linejoin:round}
+.land path.on{fill:var(--land-on)}
+.route{fill:none;stroke-width:calc(3.5px * var(--s));stroke-linecap:round;opacity:.9;transition:opacity .2s}
+.route.opt{stroke-dasharray:calc(7px * var(--s)) calc(6px * var(--s));stroke-width:calc(2.5px * var(--s))}
+.stop circle{stroke:#fff;stroke-width:calc(2px * var(--s));transition:opacity .2s}
+.stop.sel circle{stroke:var(--fg);stroke-width:calc(3px * var(--s))}
+.dim{opacity:.18}
+.labels text{fill:var(--fg);paint-order:stroke;stroke:var(--sea);stroke-width:calc(3px * var(--s));stroke-linejoin:round;font-weight:600;pointer-events:none}
+.labels text.off{display:none}
+.zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:22px;line-height:1;box-shadow:var(--shadow)}
+.legs{display:flex;gap:8px;overflow-x:auto;padding:10px 8px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.legs::-webkit-scrollbar{display:none}
+.leg{flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:.95rem;display:inline-flex;align-items:center;gap:8px}
+.leg i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.leg[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.showing{margin:2px 16px 0;font-size:.85rem;color:var(--muted);min-height:1.2em}
+main{padding:0 8px 40px;max-width:760px;margin:0 auto}
+.day,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.day header{display:flex;gap:10px;align-items:flex-start}
+.dnum{flex:0 0 auto;width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;display:grid;place-items:center;font-size:.85rem;margin-top:2px}
+.ddate{font-size:.85rem;color:var(--muted)}
+.getting{background:var(--chip);border-radius:10px;padding:10px 12px;margin:10px 0}
+.g-head{font-weight:600}
+.mode{display:inline-block;background:var(--accent);color:var(--card);border-radius:6px;padding:0 6px;font-size:.8rem;margin-right:4px}
+.g-row{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:2px}
+.g-notes{margin:.4em 0 0;font-size:.9rem}
+.plan{padding-left:1.2em;margin:.6em 0}
+.plan li{margin:.25em 0}
+.events{border-left:3px solid var(--accent);padding-left:10px}
+.event{margin:.5em 0}
+.enote{font-size:.85rem;color:var(--muted)}
+.st{font-size:.75rem;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.st-confirmed{background:var(--okbg);color:var(--ok)}
+.st-unconfirmed{background:var(--warnbg);color:var(--warn)}
+details.tips{margin-top:8px}
+details.tips summary,.panel summary{min-height:44px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+.price .usd{font-weight:700}
+.price .loc,.unit{color:var(--muted);font-size:.85em}
+.price.ph{color:var(--bad)}
+.tag{font-size:.7rem;border-radius:6px;padding:1px 5px;white-space:nowrap;vertical-align:1px}
+.t-secondary{background:var(--secbg);color:var(--sec)}
+.t-est{background:var(--warnbg);color:var(--warn)}
+.t-unverified{background:var(--badbg);color:var(--bad)}
+.src{font-size:.8rem;white-space:nowrap}
+.hint{font-size:.85rem;color:var(--muted)}
+.checklist{list-style:none;padding:0;margin:0}
+.checklist li{margin:4px 0}
+.chk{display:inline-flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 0}
+.chk input,.tgl input{width:22px;height:22px;flex:0 0 auto;margin:1px 0 0;accent-color:var(--accent)}
+.sources{padding-left:1.1em;font-size:.85rem}
+.sources .path{color:var(--muted);overflow-wrap:anywhere}
+/* budget */
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.tot{background:var(--chip);border-radius:12px;padding:10px}
+.tot .who{font-weight:700}
+.tot .big{font-size:1.15rem;font-weight:800}
+.tot table{width:100%;font-size:.8rem;border-collapse:collapse;margin-top:4px}
+.tot td{padding:1px 0}
+.tot td:last-child{text-align:right;white-space:nowrap}
+.ctrls{display:grid;gap:8px;margin:10px 0}
+.ctrls label,.rate{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+input[type=number],input[type=text]{font-size:16px;min-height:44px;width:7.5em;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.tgl{display:inline-flex;align-items:center;gap:8px;min-height:44px;min-width:44px;padding:0 4px}
+.cat{margin:14px 0 4px;font-weight:700;border-bottom:1px solid var(--line);padding-bottom:2px}
+.item{padding:8px 0;border-bottom:1px dashed var(--line)}
+.item .lbl{font-weight:600}
+.item .row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.item .note{font-size:.8rem;color:var(--muted)}
+/* bottom sheet */
+#sheet{position:fixed;left:8px;right:8px;bottom:0;max-height:min(50vh,480px);overflow:auto;overscroll-behavior:contain;background:var(--card);color:var(--fg);border-radius:16px 16px 0 0;box-shadow:var(--shadow);padding:14px 16px calc(16px + env(safe-area-inset-bottom));z-index:10;max-width:760px;margin:0 auto}
+#sheet[hidden]{display:none}
+#sheet .close{position:sticky;float:right;top:0;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:24px;line-height:1}
+#sheet h2{margin-right:52px}
+.cdates{color:var(--muted);margin-top:0}
+.costs{padding-left:1.1em}
+.btn-link{display:inline-flex;align-items:center;min-height:44px;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (min-width:900px){.mapwrap{max-width:1100px;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Florida: Bills in Miami</h1>
+  <p class="sub">Bills at Dolphins on day one, then Pompano Beach and Port St. Lucie with family and friends</p>
+  <p class="meta">Sun, Jan 3 – Fri, Jan 8 · Henry</p>
+  <p class="checked">Prices and rules checked 2026-11-23. USD first, local price in grey. Labels: <span class="tag t-secondary">secondary source</span> <span class="tag t-est">est</span> <span class="tag t-unverified">unverified</span>; unlabeled items come from official sources.</p>
+</header>
+
+<section class="mapwrap" aria-label="Trip map">
+  <svg id="map" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid meet" role="application" aria-label="Map. Drag to pan, pinch to zoom, tap a stop for details.">
+    <rect class="sea" x="-600" y="-539.9999999999989" width="2200" height="1979.9999999999961"/>
+    <g class="land"><path class="on" d="M248.3,-540L260.2,-512.8L382.5,-307.4L396.9,-278.5L381.1,-253.3L375.9,-228L374.6,-189.2L378.5,-151.7L393,-105.7L421.9,-35.4L406.1,-49.7L365.4,-150.3L360.1,-209.3L366.7,-293.6L357.5,-291.5L349.6,-264.1L345.6,-232.4L335.1,-219.4L320.7,-268.4L322,-290.8L336.4,-316.7L332.5,-326.1L308.8,-339.1L303.6,-360.1L306.2,-381L293.1,-391.9L282.6,-391.2L289.1,-340.6L301,-309.5L315.4,-234.5L337.8,-189.2L350.9,-151.7L506,249.9L542.8,301.2L556,337.5L570.4,413.5L573.1,511.4L548.1,689.7L541.5,810.3L538.9,806.8L536.3,794.1L529.7,792.7L508.7,847.6L478.4,897.5L467.9,974.8L454.8,1014.1L411.4,1054.8L385.1,1054.1L319.4,1084.2L273.3,1076.5L218.1,1094L182.6,1091.9L161.6,1055.5L165.6,1039.3L173.4,1022.5L187.9,1019L235.2,1056.9L244.4,1040.8L230,1021.8L202.4,1011.3L181.3,999.4L140.6,911.6L97.2,851.8L89.3,811.7L15.7,787L-38.2,749.7L-73.7,683.4L-93.4,566L-117.1,552.5L-127.6,543.3L-103.9,499.4L-79,463.2L-98.7,472.4L-113.1,485.9L-131.5,517.8L-144.7,522.8L-156.5,517.8L-171,456.1L-167,379.4L-147.3,351L-177.5,349.6L-207.8,360.9L-203.8,386.5L-207.8,400.7L-231.4,396.5L-248.5,388L-270.9,360.9L-303.7,310.4L-368.2,170L-381.3,150.7L-403.6,130L-393.1,123.6L-374.7,119.3L-332.7,56.3L-299.8,17.7L-288,-8.9L-290.6,-20.3L-305.1,-36.8L-323.5,-22.5L-332.7,-26.1L-353.7,-59.8L-374.7,-69.1L-389.2,-61.9L-373.4,-34.7L-360.3,-24.6L-365.5,15.5L-370.8,28.4L-383.9,39.9L-403.6,33.4L-412.8,43.4L-424.7,32.7L-436.5,15.5L-449.7,-13.2L-415.5,-174.8L-383.9,-278.5L-380,-396.2L-377.4,-413.6L-380,-445.4L-423.4,-513.5L-453.4,-540L248.3,-540ZM-155.2,558.2L-168.3,568.8L-194.6,561L-209.1,546.9L-215.7,519.9L-193.3,549L-184.1,555.4ZM-172.3,517.8L-173.6,541.9L-192,501.5L-203.8,457.5L-186.7,471.7ZM448.2,1090.5L375.9,1166.1L383.8,1147.2L412.7,1106.6L421.9,1087L440.3,1075.1L458.7,1053.4L460,1027.4L486.3,1009.9L494.2,1007.1ZM101.1,1288.3L89.3,1296.6L84.1,1293.8L84.1,1282L69.6,1254.8L69.6,1247.8L105.1,1274.3L106.4,1281.3ZM285.2,1226.9L278.6,1226.9L281.2,1220.6L295.7,1209.4L301,1213.6L301,1219.9ZM354.9,1186.3L345.6,1188.4L360.1,1171L364.1,1172.4ZM206.3,1261.8L190.5,1270.8L173.4,1263.8L191.8,1254.8L248.4,1244.3L227.3,1256.9ZM15.7,1308.5L-8,1312.7L11.8,1296.6L18.3,1272.9L28.8,1291.1L28.8,1302.9ZM520.5,220.7L525.7,250.6L492.9,180.7L450.8,70.6L428.5,-15.3L444.2,8.3L458.7,55.6ZM-63.2,1330.8L-72.4,1331.5L-73.7,1325.2L-57.9,1317.6L-46.1,1318.2L-47.4,1326.6Z"/><path class="ctx" d="M1408.8,1440L1427.5,1433.8L1433.9,1440L1408.8,1440ZM1600,782.6L1593.2,785.6L1561.6,744.8L1536.6,732.8L1576.1,703.8L1593.2,679.1L1593.2,625.4L1600,603.3L1600,782.6ZM1600,572.8L1599.7,570.2L1600,569.5L1600,572.8ZM1600,521.6L1597.1,514.3L1562.9,490.9L1497.2,397.9L1393.3,375.2L1339.5,374.5L1368.4,359.5L1396,360.9L1438,370.2L1489.3,374.5L1519.5,402.2L1548.5,438.4L1576.1,452.6L1586.6,462.5L1585.3,472.4L1589.2,482.4L1600,487.5L1600,521.6ZM1411.8,1265.2L1411.8,1314.1L1415.7,1350.3L1411.8,1363.5L1372.3,1387.2L1361.8,1401.1L1325,1415L1302.6,1433.8L1290.8,1402.5L1268.5,1383.7L1265.8,1351L1248.7,1362.1L1223.8,1355.2L1184.3,1330.8L1159.4,1297.3L1194.9,1291.8L1201.4,1312.7L1230.3,1286.9L1223.8,1273.6L1218.5,1271.5L1209.3,1246.4L1251.4,1180.7L1260.6,1138.8L1240.9,1070.2L1259.3,1066L1306.6,1089.8L1327.6,1113.6L1327.6,1145.8L1348.7,1170.3L1376.3,1230.3ZM1138.3,445.5L1183,458.3L1206.7,456.8L1221.1,448.3L1285.6,451.9L1339.5,439.8L1347.3,461.1L1346,472.4L1233,483.1L1130.4,515L1073.9,537L1046.3,539.1L1026.6,527.7L958.2,461.8L976.6,468.9L1026.6,505.8L1058.1,498.7L1087.1,474.6L1092.3,456.1L1087.1,446.9L1100.2,417.8ZM1556.4,1141.6L1515.6,1150L1485.4,1142.3L1478.8,1135.3L1490.6,1124.1L1518.2,1115L1562.9,1114.3L1582.6,1124.8L1585.3,1129.7Z"/></g>
+    <g class="routes"><path class="route" data-leg="game" style="stroke:#1c5bd8" d="M532.4 713.4L511.3 722.3"><title>Ride from the airport to Park &amp; Ride Lot 70</title></path><path class="route" data-leg="game" style="stroke:#1c5bd8" d="M511.3 722.3L500.9 760"><title>Free Park &amp; Ride shuttle to Hard Rock Stadium</title></path><path class="route" data-leg="game" style="stroke:#1c5bd8" d="M500.9 760L542.6 646.2"><title>After the game, drive up to Pompano Beach</title></path><path class="route" data-leg="psl" style="stroke:#d9480f" d="M542.6 646.2L457.4 222.9"><title>Drive Pompano → Port St. Lucie, about 80 mi</title></path><path class="route opt" data-leg="psl" style="stroke:#d9480f" d="M457.4 222.9L488.5 240.7"><title>Optional: Savannas Preserve</title></path><path class="route opt" data-leg="psl" style="stroke:#d9480f" d="M457.4 222.9L481.4 140"><title>Optional: Hutchinson Island beaches and Fort Pierce Inlet</title></path><path class="route" data-leg="home" style="stroke:#2b8a3e" d="M457.4 222.9L542.6 646.2"><title>Drive back to Pompano Beach</title></path><path class="route" data-leg="home" style="stroke:#2b8a3e" d="M542.6 646.2L532.4 713.4"><title>Ride to Fort Lauderdale Airport</title></path></g>
+    <g class="markers"><g class="stop" data-stop="fll" data-legs="game home" tabindex="0" role="button" aria-label="Fort Lauderdale Airport: open details"><circle cx="532.4" cy="713.4" r="7" style="fill:#1c5bd8"/></g><g class="stop" data-stop="lot70" data-legs="game" tabindex="0" role="button" aria-label="Park &amp; Ride Lot 70: open details"><circle cx="511.3" cy="722.3" r="7" style="fill:#1c5bd8"/></g><g class="stop" data-stop="stadium" data-legs="game" tabindex="0" role="button" aria-label="Hard Rock Stadium: open details"><circle cx="500.9" cy="760" r="7" style="fill:#1c5bd8"/></g><g class="stop" data-stop="pompano" data-legs="game psl home" tabindex="0" role="button" aria-label="Pompano Beach: open details"><circle cx="542.6" cy="646.2" r="7" style="fill:#1c5bd8"/></g><g class="stop" data-stop="psl" data-legs="psl home" tabindex="0" role="button" aria-label="Port St. Lucie: open details"><circle cx="457.4" cy="222.9" r="7" style="fill:#d9480f"/></g><g class="stop" data-stop="savannas" data-legs="psl" tabindex="0" role="button" aria-label="Savannas Preserve: open details"><circle cx="488.5" cy="240.7" r="7" style="fill:#d9480f"/></g><g class="stop" data-stop="hutch" data-legs="psl" tabindex="0" role="button" aria-label="Fort Pierce Inlet: open details"><circle cx="481.4" cy="140" r="7" style="fill:#d9480f"/></g></g>
+    <g class="labels" aria-hidden="true"><text data-stop="fll" x="532.4" y="713.4">Fort Lauderdale Airport</text><text data-stop="lot70" x="511.3" y="722.3">Park &amp; Ride Lot 70</text><text data-stop="stadium" x="500.9" y="760">Hard Rock Stadium</text><text data-stop="pompano" x="542.6" y="646.2">Pompano Beach</text><text data-stop="psl" x="457.4" y="222.9">Port St. Lucie</text><text data-stop="savannas" x="488.5" y="240.7">Savannas Preserve</text><text data-stop="hutch" x="481.4" y="140">Fort Pierce Inlet</text></g>
+  </svg>
+  <div class="zoom">
+    <button type="button" id="zin" aria-label="Zoom in">+</button>
+    <button type="button" id="zout" aria-label="Zoom out">−</button>
+    <button type="button" id="zhome" aria-label="Show whole trip">⤢</button>
+  </div>
+</section>
+
+<nav class="legs" aria-label="Trip legs"><button type="button" class="leg" data-leg="all" aria-pressed="true">All</button><button type="button" class="leg" data-leg="game" aria-pressed="false"><i style="background:#1c5bd8"></i>Game + Pompano</button><button type="button" class="leg" data-leg="psl" aria-pressed="false"><i style="background:#d9480f"></i>Port St. Lucie</button><button type="button" class="leg" data-leg="home" aria-pressed="false"><i style="background:#2b8a3e"></i>Pompano + home</button></nav>
+<p class="showing" id="showing" aria-live="polite"></p>
+
+<main>
+  <section id="days" aria-label="Day by day"><article class="day" id="day-2027-01-03" data-leg="game" data-stop="stadium">
+<header><span class="dnum" style="background:#1c5bd8">1</span><div><div class="ddate">Sun, Jan 3 · Hard Rock Stadium</div><h3>Fly down, straight to the Bills game</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">Flight</span> Buffalo BUF → Fort Lauderdale FLL</div>
+<div class="g-row"><span>⏱ ≈ 3 h nonstop</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.jetblue.com/en/flights-from-buffalo-to-fort-lauderdale" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">You need to land by about 10:30 AM to make a 1:00 PM kickoff. A JetBlue sample schedule shows a 7:07 AM departure landing 10:15 AM, but that was a past date. Check the actual Sunday Jan 3 times before booking; Southwest may not fly this route on Sundays. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.flightsfrom.com/BUF-FLL" target="_blank" rel="noopener">source</a></p></div><div class="getting"><div class="g-head"><span class="mode">Car + shuttle</span> Fort Lauderdale Airport → Hard Rock Stadium</div>
+<div class="g-row"><span>⏱ ≈ 33 min by car (no traffic)</span><span><span class="price" data-lo="10" data-hi="10" data-cur="USD"><b class="usd">$10</b></span> <span class="unit">Park &amp; Ride, per car</span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Easiest: your ride picks you up at FLL, you drop your bag in their car, and you park at Lot 70 near the Seminole Hard Rock Hotel and take the free shuttle. Stadium lots are prepaid only. Rideshare drops at a designated lot away from the gates. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/fll-to-hard-rock-stadium/" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Morning flight, carry-on only if you can so you don&#39;t wait at baggage claim.</li><li>Bills at Dolphins, 1:00 PM kickoff.</li><li>After the game, drive up to Pompano Beach (about 30 miles) for the night.</li></ul>
+<div class="events"><h4>Event options</h4><div class="event"><b>Bills at Dolphins (Week 17)</b> <span class="st st-confirmed">dates confirmed</span><div>Sun Jan 3, 2027, 1:00 PM ET, Hard Rock Stadium. One site shows a different time; the NFL can still flex late-season games, so check the week before. · <span class="price" data-lo="118" data-hi="537" data-cur="USD"><b class="usd">$118–537</b></span> <span class="unit">resale, per ticket</span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://ticketx.com/miami-dolphins-tickets/hard-rock-stadium-2027-01-03-13-pm/d8908c7a-cc38-48ef-b578-571dc9c56533" target="_blank" rel="noopener">source</a></div><div class="enote">Low end is TicketX&#39;s cheapest listing ($117.70); Gametime shows upper end zone seats from $131 with fees. High end is TicketX&#39;s listed average. Compare all-in checkout prices.</div><a class="src" href="https://www.miamidolphins.com/news/miami-dolphins-announce-2026-schedule-presented-by-skyscanner" target="_blank" rel="noopener">source</a></div><div class="event"><b>Bills Backers Miami tailgate</b> <span class="st st-unconfirmed">dates unconfirmed</span><div>Held at past Miami games in the stadium&#39;s Bus Lot; nothing posted for Jan 3, 2027 yet.</div><div class="enote">The club also runs watch parties at Booze Garden Fort Lauderdale and Catch Wynwood.</div><a class="src" href="https://www.audacy.com/wben/news/bills/miami-bills-backers-welcome-back-bills-mafia-for-big-thursday-night-showdown-with-dolphins" target="_blank" rel="noopener">source</a></div></div>
+<details class="tips"><summary>Local tips</summary><ul><li>Bring a clear bag or nothing; bags are X-rayed or hand-searched at the gates.  <a class="src" href="https://hardrockstadium.com/?p=12722" target="_blank" rel="noopener">source</a></li><li>Clear bag policy: one clear bag up to 12 × 6 × 12 in, or a small clutch up to 4.5 × 6.5 in. Leave your suitcase in the car.  <a class="src" href="https://www.hardrockstadium.com/?p=2767" target="_blank" rel="noopener">source</a></li><li>On-site parking is prepaid only; if your ride doesn&#39;t have a pass, use Park &amp; Ride instead. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock" target="_blank" rel="noopener">source</a></li><li>Rideshare drop-off and pickup are in a designated lot, not at the gates, and can be a long walk. Surge pricing after the game is likely. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/blog/ridehrs-2023" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-01-04" data-leg="game" data-stop="pompano">
+<header><span class="dnum" style="background:#1c5bd8">2</span><div><div class="ddate">Mon, Jan 4 · Pompano Beach</div><h3>Beach day in Pompano</h3></div></header>
+
+<ul class="plan"><li>Recover from the game. Beach, then walk out on Fisher Family Pier.</li><li>Lunch or dinner at the Pompano Fishing Village.</li><li>Optional: Hillsboro Inlet Park for a view of the lighthouse.</li></ul>
+
+<details class="tips"><summary>Local tips</summary><ul><li>Fisher Family Pier runs about 900 ft out from the beach; the Pompano Fishing Village next to it has restaurants on the sand. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.visitlauderdale.com/beaches-and-beyond/beaches/pompano-beach/" target="_blank" rel="noopener">source</a></li><li>January is dry, with highs in the low-to-mid 70s °F and lows around 56–64 °F. The ocean is usually about 74–77 °F. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.weather-us.com/en/florida-usa/pompano-beach-weather-january" target="_blank" rel="noopener">source</a></li><li>Hillsboro Inlet Lighthouse can only be toured by boat on a few set days a year, so check the preservation society&#39;s schedule; otherwise view it from Hillsboro Inlet Park. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://cdn.fodors.com/world/north-america/usa/florida/fort-lauderdale-and-broward-county/places/pompano-beach/things-to-do/sights" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-01-05" data-leg="game psl" data-stop="psl">
+<header><span class="dnum" style="background:#d9480f">3</span><div><div class="ddate">Tue, Jan 5 · Port St. Lucie</div><h3>Drive up to Port St. Lucie</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">Car</span> Pompano Beach → Port St. Lucie</div>
+<div class="g-row"><span>⏱ ≈ 1 h 40 min, about 80 mi</span><span><span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></span></div>
+<p class="g-notes">I-95 has no tolls on this stretch; the Turnpike is usually smoother but tolled. I couldn&#39;t confirm the toll amount. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.ustripplanner.com/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Easy afternoon and evening with family and friends.</li></ul>
+
+<details class="tips"><summary>Local tips</summary><ul><li>Port St. Lucie is inland; the beaches are on Hutchinson Island to the east. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://planetware.com/florida/top-rated-things-to-do-in-port-st-lucie-fl-us-fl-440.htm" target="_blank" rel="noopener">source</a></li><li>The drive from Pompano is about 80 miles and 1 h 40 min by I-95 or Florida&#39;s Turnpike. The Turnpike has tolls; cars without SunPass are billed by plate with extra fees. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.ustripplanner.com/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-01-06" data-leg="psl" data-stop="psl">
+<header><span class="dnum" style="background:#d9480f">4</span><div><div class="ddate">Wed, Jan 6 · Port St. Lucie</div><h3>Treasure Coast day</h3></div></header>
+
+<ul class="plan"><li>Morning walk at Savannas Preserve State Park.</li><li>Afternoon on Hutchinson Island: Fort Pierce Inlet State Park, Jetty Park or Pepper Park.</li></ul>
+
+
+</article>
+<article class="day" id="day-2027-01-07" data-leg="psl home" data-stop="pompano">
+<header><span class="dnum" style="background:#2b8a3e">5</span><div><div class="ddate">Thu, Jan 7 · Pompano Beach</div><h3>Back to Pompano</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">Car</span> Port St. Lucie → Pompano Beach</div>
+<div class="g-row"><span>⏱ ≈ 1 h 40 min, about 80 mi</span></div>
+<p class="g-notes">Same drive in reverse. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.ustripplanner.com/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Last beach afternoon and a dinner out.</li></ul>
+
+
+</article>
+<article class="day" id="day-2027-01-08" data-leg="home" data-stop="fll">
+<header><span class="dnum" style="background:#2b8a3e">6</span><div><div class="ddate">Fri, Jan 8 · Fort Lauderdale Airport</div><h3>Fly home to Buffalo</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">Flight</span> Fort Lauderdale FLL → Buffalo BUF</div>
+<div class="g-row"><span>⏱ ≈ 3 h nonstop</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-fort-lauderdale-to-buffalo-niagara-falls" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">FLL is about 20–30 minutes from Pompano. Pack warm clothes for Buffalo in your carry-on. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.flightsfrom.com/FLL-BUF" target="_blank" rel="noopener">source</a></p></div>
+
+
+<details class="tips"><summary>Local tips</summary><ul><li>JetBlue and Southwest fly Buffalo ↔ Fort Lauderdale nonstop; the flight is about 3 hours. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.flightsfrom.com/BUF-FLL" target="_blank" rel="noopener">source</a></li><li>Jan 3 is a Sunday. Older schedule data shows no Sunday Southwest nonstop on this route, so check both airlines for a Sunday morning flight. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://southwest.com/routes/flights-from-buffalo-niagara-falls-to-fort-lauderdale" target="_blank" rel="noopener">source</a></li></ul></details>
+</article></section>
+
+  <section class="panel" id="budget" aria-label="Budget calculator">
+    <h2>Budget calculator</h2>
+    <p class="hint">Per person, low (budget) to high (comfort). Turn items on or off for each traveler, change activity days, room sharing and exchange rates. Everything recalculates, including prices above.</p>
+    <div id="budget-ui"></div>
+  </section>
+
+  <section class="panel" id="before" aria-label="Before you go">
+    <h2>Before you go</h2>
+    <ul class="checklist"><li><label class="chk"><input type="checkbox" data-check="0"><span>Buy the game ticket on a resale site you trust; compare the all-in price at checkout.</span></label> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://gametime.co/nfl-football/bills-at-dolphins-tickets/1-3-2027-miami-gardens-fl-hard-rock-stadium/events/695d9018fa6aa65308202ee3" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="1"><span>Book a Sunday Jan 3 morning nonstop that lands by about 10:30 AM, and a Friday Jan 8 flight home.</span></label> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.flightsfrom.com/BUF-FLL" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="2"><span>Confirm the game time the week before; the NFL can move late-season games.</span></label>  <a class="src" href="https://www.miamidolphins.com/news/miami-dolphins-announce-2026-schedule-presented-by-skyscanner" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="3"><span>Pack a clear stadium bag (12 × 6 × 12 in max).</span></label>  <a class="src" href="https://www.hardrockstadium.com/?p=2767" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="4"><span>Ask your ride whether they&#39;re buying a stadium parking pass or using Park &amp; Ride.</span></label> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="5"><span>Pack light: shorts and a light jacket for evenings in the 50s–60s °F.</span></label> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.weather-us.com/en/florida-usa/pompano-beach-weather-january" target="_blank" rel="noopener">source</a></li></ul>
+  </section>
+
+  <section class="panel" id="notes" aria-label="Notes">
+    <h2>Notes</h2>
+    <ul><li>You&#39;re staying with family and friends, so lodging is $0 and they&#39;re driving. The budget covers flights, the game, gas money and food.</li><li>Flights, gas, food and the host thank-you are estimates (est). Everything else links to the page I checked on 2026-11-23.</li></ul>
+  </section>
+
+  <section class="panel" id="sources" aria-label="Sources">
+    <h2>Sources</h2>
+    <p class="hint">Checked {{CHECKED}}.</p>
+    <ul class="sources"><li><a href="https://www.audacy.com/wben/news/bills/miami-bills-backers-welcome-back-bills-mafia-for-big-thursday-night-showdown-with-dolphins" target="_blank" rel="noopener">audacy.com</a> <span class="path">/wben/news/bills/miami-bills-backers-welcome-back-bills-mafi</span></li><li><a href="https://cdn.fodors.com/world/north-america/usa/florida/fort-lauderdale-and-broward-county/places/pompano-beach/things-to-do/sights" target="_blank" rel="noopener">cdn.fodors.com</a> <span class="path">/world/north-america/usa/florida/fort-lauderdale-and-broward</span></li><li><a href="https://cdn.fodors.com/world/north-america/usa/florida/palm-beach-and-the-treasure-coast/places/fort-pierce-and-port-st-lucie/things-to-do/sights" target="_blank" rel="noopener">cdn.fodors.com</a> <span class="path">/world/north-america/usa/florida/palm-beach-and-the-treasure</span></li><li><a href="https://www.flightsfrom.com/BUF-FLL" target="_blank" rel="noopener">flightsfrom.com</a> <span class="path">/BUF-FLL</span></li><li><a href="https://www.flightsfrom.com/FLL-BUF" target="_blank" rel="noopener">flightsfrom.com</a> <span class="path">/FLL-BUF</span></li><li><a href="https://www.fox13news.com/news/florida-gas-prices-drop-8-month-low" target="_blank" rel="noopener">fox13news.com</a> <span class="path">/news/florida-gas-prices-drop-8-month-low</span></li><li><a href="https://gametime.co/nfl-football/bills-at-dolphins-tickets/1-3-2027-miami-gardens-fl-hard-rock-stadium/events/695d9018fa6aa65308202ee3" target="_blank" rel="noopener">gametime.co</a> <span class="path">/nfl-football/bills-at-dolphins-tickets/1-3-2027-miami-garde</span></li><li><a href="https://hardrockstadium.com/?p=13918" target="_blank" rel="noopener">hardrockstadium.com</a> <span class="path">/</span></li><li><a href="https://www.hardrockstadium.com/?p=2767" target="_blank" rel="noopener">hardrockstadium.com</a> <span class="path">/</span></li><li><a href="https://hardrockstadium.com/?p=12722" target="_blank" rel="noopener">hardrockstadium.com</a> <span class="path">/</span></li><li><a href="https://www.jetblue.com/en/flights-from-buffalo-to-fort-lauderdale" target="_blank" rel="noopener">jetblue.com</a> <span class="path">/en/flights-from-buffalo-to-fort-lauderdale</span></li><li><a href="https://www.miamidolphins.com/news/miami-dolphins-announce-2026-schedule-presented-by-skyscanner" target="_blank" rel="noopener">miamidolphins.com</a> <span class="path">/news/miami-dolphins-announce-2026-schedule-presented-by-sky</span></li><li><a href="https://planetware.com/florida/top-rated-things-to-do-in-port-st-lucie-fl-us-fl-440.htm" target="_blank" rel="noopener">planetware.com</a> <span class="path">/florida/top-rated-things-to-do-in-port-st-lucie-fl-us-fl-44</span></li><li><a href="https://southwest.com/routes/flights-from-buffalo-niagara-falls-to-fort-lauderdale" target="_blank" rel="noopener">southwest.com</a> <span class="path">/routes/flights-from-buffalo-niagara-falls-to-fort-lauderdal</span></li><li><a href="https://www.southwest.com/en/flights/flights-from-fort-lauderdale-to-buffalo-niagara-falls" target="_blank" rel="noopener">southwest.com</a> <span class="path">/en/flights/flights-from-fort-lauderdale-to-buffalo-niagara-</span></li><li><a href="https://thepointsguy.com/news/jetblue-raises-baggage-fees-again/" target="_blank" rel="noopener">thepointsguy.com</a> <span class="path">/news/jetblue-raises-baggage-fees-again/</span></li><li><a href="https://ticketx.com/miami-dolphins-tickets/hard-rock-stadium-2027-01-03-13-pm/d8908c7a-cc38-48ef-b578-571dc9c56533" target="_blank" rel="noopener">ticketx.com</a> <span class="path">/miami-dolphins-tickets/hard-rock-stadium-2027-01-03-13-pm/d</span></li><li><a href="https://www.uber.com/blog/ridehrs-2023" target="_blank" rel="noopener">uber.com</a> <span class="path">/blog/ridehrs-2023</span></li><li><a href="https://www.uber.com/global/en/r/routes/fll-to-hard-rock-stadium/" target="_blank" rel="noopener">uber.com</a> <span class="path">/global/en/r/routes/fll-to-hard-rock-stadium/</span></li><li><a href="https://www.ustripplanner.com/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl" target="_blank" rel="noopener">ustripplanner.com</a> <span class="path">/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl</span></li><li><a href="https://www.visitlauderdale.com/beaches-and-beyond/beaches/pompano-beach/" target="_blank" rel="noopener">visitlauderdale.com</a> <span class="path">/beaches-and-beyond/beaches/pompano-beach/</span></li><li><a href="https://www.weather-us.com/en/florida-usa/pompano-beach-weather-january" target="_blank" rel="noopener">weather-us.com</a> <span class="path">/en/florida-usa/pompano-beach-weather-january</span></li><li><a href="https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock" target="_blank" rel="noopener">wptv.com</a> <span class="path">/sports/football/dolphins/miami-dolphins-host-giants-saturda</span></li></ul>
+  </section>
+</main>
+
+<div id="sheet" role="dialog" aria-modal="false" aria-labelledby="sheet-title" hidden>
+  <button type="button" class="close" id="sheet-close" aria-label="Close">×</button>
+  <div id="sheet-body"></div>
+</div>
+
+<div hidden><template id="card-fll"><h2>Fort Lauderdale Airport</h2><p class="cdates">Jan 3 (arrive), Jan 8 (depart)</p>
+<p>Nonstop from Buffalo (about 3 hours) and back. Get picked up here on game morning.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">Flight</span> Buffalo BUF → Fort Lauderdale FLL</div>
+<div class="g-row"><span>⏱ ≈ 3 h nonstop</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.jetblue.com/en/flights-from-buffalo-to-fort-lauderdale" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">You need to land by about 10:30 AM to make a 1:00 PM kickoff. A JetBlue sample schedule shows a 7:07 AM departure landing 10:15 AM, but that was a past date. Check the actual Sunday Jan 3 times before booking; Southwest may not fly this route on Sundays. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.flightsfrom.com/BUF-FLL" target="_blank" rel="noopener">source</a></p></div><div class="getting"><div class="g-head"><span class="mode">Flight</span> Fort Lauderdale FLL → Buffalo BUF</div>
+<div class="g-row"><span>⏱ ≈ 3 h nonstop</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-fort-lauderdale-to-buffalo-niagara-falls" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">FLL is about 20–30 minutes from Pompano. Pack warm clothes for Buffalo in your carry-on. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.flightsfrom.com/FLL-BUF" target="_blank" rel="noopener">source</a></p></div>
+
+<p><a class="btn-link" href="#day-2027-01-08" data-close>See the days here ↓</a></p></template>
+<template id="card-lot70"><h2>Park &amp; Ride Lot 70</h2><p class="cdates">Jan 3 (game day)</p>
+<p>Dolphins Park &amp; Ride lot across from the Seminole Hard Rock Hotel. Free shuttle to the stadium; parking is $10 per car.</p>
+
+<h4>Costs here</h4><ul class="costs"><li>Park &amp; Ride on game day (per car): <span class="price" data-lo="10" data-hi="10" data-cur="USD"><b class="usd">$10</b></span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock" target="_blank" rel="noopener">source</a></li></ul>
+</template>
+<template id="card-stadium"><h2>Hard Rock Stadium</h2><p class="cdates">Sun Jan 3, 1:00 PM</p>
+<p>Bills at Dolphins, Week 17, the AFC East finale. Expect a big Bills crowd.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">Car + shuttle</span> Fort Lauderdale Airport → Hard Rock Stadium</div>
+<div class="g-row"><span>⏱ ≈ 33 min by car (no traffic)</span><span><span class="price" data-lo="10" data-hi="10" data-cur="USD"><b class="usd">$10</b></span> <span class="unit">Park &amp; Ride, per car</span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Easiest: your ride picks you up at FLL, you drop your bag in their car, and you park at Lot 70 near the Seminole Hard Rock Hotel and take the free shuttle. Stadium lots are prepaid only. Rideshare drops at a designated lot away from the gates. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/fll-to-hard-rock-stadium/" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>Rideshare, if no one can drive you (FLL → stadium): <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></li><li>Bills at Dolphins ticket (resale): <span class="price" data-lo="118" data-hi="537" data-cur="USD"><b class="usd">$118–537</b></span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://ticketx.com/miami-dolphins-tickets/hard-rock-stadium-2027-01-03-13-pm/d8908c7a-cc38-48ef-b578-571dc9c56533" target="_blank" rel="noopener">source</a></li><li>Stadium food, drinks and merch: <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></li></ul>
+<p><a class="btn-link" href="#day-2027-01-03" data-close>See the days here ↓</a></p></template>
+<template id="card-pompano"><h2>Pompano Beach</h2><p class="cdates">Jan 3–5, Jan 7–8 · 3 nights</p>
+<p>Home base with family and friends: two nights at the start, one at the end. Beach, the pier and the Fishing Village.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">Car</span> Port St. Lucie → Pompano Beach</div>
+<div class="g-row"><span>⏱ ≈ 1 h 40 min, about 80 mi</span></div>
+<p class="g-notes">Same drive in reverse. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.ustripplanner.com/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl" target="_blank" rel="noopener">source</a></p></div>
+
+<p><a class="btn-link" href="#day-2027-01-04" data-close>See the days here ↓</a></p></template>
+<template id="card-psl"><h2>Port St. Lucie</h2><p class="cdates">Jan 5–7 · 2 nights</p>
+<p>Two nights with family and friends on the Treasure Coast, about 80 miles north of Pompano.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">Car</span> Pompano Beach → Port St. Lucie</div>
+<div class="g-row"><span>⏱ ≈ 1 h 40 min, about 80 mi</span><span><span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></span></div>
+<p class="g-notes">I-95 has no tolls on this stretch; the Turnpike is usually smoother but tolled. I couldn&#39;t confirm the toll amount. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.ustripplanner.com/trip/port-saint-lucie-fl-to-pompano-beach-highlands-fl" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>Turnpike tolls (optional route): <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></li></ul>
+<p><a class="btn-link" href="#day-2027-01-05" data-close>See the days here ↓</a></p></template>
+<template id="card-savannas"><h2>Savannas Preserve</h2><p class="cdates">Jan 6 (option)</p>
+<p>Freshwater marsh state park: about 15 miles of trails, a boardwalk, and paddling.</p>
+
+
+</template>
+<template id="card-hutch"><h2>Fort Pierce Inlet</h2><p class="cdates">Jan 6 (option)</p>
+<p>North end of Hutchinson Island: a quiet state-park beach, the jetty, and surfing. Pepper Park and Jetty Park are nearby.</p>
+
+
+</template></div>
+<script type="application/json" id="trip-data">{"slug":"florida-bills-2027","version":"2026-11-23T23:08:26.756Z","checked":"2026-11-23","rates":{},"rateInfo":{},"travelers":[{"id":"h","name":"Henry"}],"legs":[{"id":"game","name":"Game + Pompano","color":"#1c5bd8","stops":["fll","lot70","stadium","pompano"]},{"id":"psl","name":"Port St. Lucie","color":"#d9480f","stops":["pompano","psl","savannas","hutch"]},{"id":"home","name":"Pompano + home","color":"#2b8a3e","stops":["fll","pompano","psl"]}],"stops":[{"id":"fll","name":"Fort Lauderdale Airport","major":false,"x":532.4,"y":713.4},{"id":"lot70","name":"Park & Ride Lot 70","major":false,"x":511.3,"y":722.3},{"id":"stadium","name":"Hard Rock Stadium","major":true,"x":500.9,"y":760},{"id":"pompano","name":"Pompano Beach","major":true,"x":542.6,"y":646.2},{"id":"psl","name":"Port St. Lucie","major":true,"x":457.4,"y":222.9},{"id":"savannas","name":"Savannas Preserve","major":false,"x":488.5,"y":240.7},{"id":"hutch","name":"Fort Pierce Inlet","major":false,"x":481.4,"y":140}],"map":{"home":{"x":0,"y":0,"w":1000,"h":900},"limit":{"x":-600,"y":-539.9999999999989,"w":2200,"h":1979.9999999999961}},"budget":{"roomSize":1,"sharing":false,"cats":[{"id":"flights","label":"Flights"},{"id":"transport","label":"Transport"},{"id":"activities","label":"Game & activities"},{"id":"lodging","label":"Lodging"},{"id":"food","label":"Food"}],"items":[{"id":"fly","cat":"flights","label":"BUF ↔ FLL nonstop, round trip (economy)","lo":250,"hi":500,"cur":"USD","per":"person","tag":"est","src":"https://www.jetblue.com/en/flights-from-buffalo-to-fort-lauderdale","basis":"JetBlue and Southwest route pages show off-peak one-way fares from about $81–134; the first week of January runs higher."},{"id":"bag","cat":"flights","label":"Checked bag, each way (untick if carry-on only)","lo":45,"hi":70,"cur":"USD","per":"person","qty":2,"who":[],"tag":"secondary","src":"https://thepointsguy.com/news/jetblue-raises-baggage-fees-again/","note":"Southwest's first bag is $45 (since Apr 2026). JetBlue's first bag is $50–70 for tickets bought from Nov 3, 2026, depending on when you pay."},{"id":"parkride","cat":"transport","label":"Park & Ride on game day (per car)","lo":10,"cur":"USD","per":"person","stop":"lot70","tag":"secondary","src":"https://www.wptv.com/sports/football/dolphins/miami-dolphins-host-giants-saturday-heres-what-fans-need-to-know-before-heading-to-hard-rock"},{"id":"gas","cat":"transport","label":"Gas money for your rides","lo":30,"hi":60,"cur":"USD","per":"person","tag":"est","src":"https://www.fox13news.com/news/florida-gas-prices-drop-8-month-low","basis":"About 250 miles of driving (airport, game, two Pompano ↔ PSL runs) at 20–25 mpg and Florida's $3.62/gal average (Nov 2026), rounded up."},{"id":"tolls","cat":"transport","label":"Turnpike tolls (optional route)","lo":null,"cur":"USD","per":"person","who":[],"tag":"unverified","stop":"psl","note":"Only if you take the Turnpike instead of I-95. Type in the amount if you pay it."},{"id":"uber","cat":"transport","label":"Rideshare, if no one can drive you (FLL → stadium)","lo":null,"cur":"USD","per":"person","who":[],"tag":"unverified","stop":"stadium","note":"Uber's route page didn't show a fare. Check the app; expect game-day surge pricing."},{"id":"ticket","cat":"activities","label":"Bills at Dolphins ticket (resale)","lo":118,"hi":537,"cur":"USD","per":"person","stop":"stadium","tag":"secondary","src":"https://ticketx.com/miami-dolphins-tickets/hard-rock-stadium-2027-01-03-13-pm/d8908c7a-cc38-48ef-b578-571dc9c56533","note":"$117.70 is the cheapest listing seen; $537 is the site's average listing. Gametime showed upper end zone from $131 with fees."},{"id":"stadiumfood","cat":"activities","label":"Stadium food, drinks and merch","lo":null,"cur":"USD","per":"person","tag":"unverified","stop":"stadium","note":"No current price list found. Type in what you expect to spend."},{"id":"lodging","cat":"lodging","label":"Staying with family and friends","lo":0,"cur":"USD","per":"person","tag":"est","basis":"Free; hosts cover all five nights."},{"id":"hostgift","cat":"lodging","label":"Thank-you for hosts (dinner out or gift)","lo":50,"hi":150,"cur":"USD","per":"person","tag":"est","basis":"Your choice: one dinner out or a small gift for each host household."},{"id":"food","cat":"food","label":"Food & drinks (hosts cook some meals)","lo":25,"hi":60,"cur":"USD","per":"person","perDay":true,"days":6,"tag":"est","basis":"One or two meals a day out, at casual restaurants, plus drinks."}]}}</script>
+<script>(function () {
+  'use strict';
+  var D = JSON.parse(document.getElementById('trip-data').textContent);
+  var KEY = 'trip-map:' + D.slug;
+  var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  // ---------- state (saved per device; reset when the page is republished) ----------
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
+  if (saved.version !== D.version) saved = { checks: saved.checks };
+  var items = D.budget.items;
+  var S = { rates: {}, sharing: D.budget.sharing !== false, days: {}, on: {}, ph: {}, checks: saved.checks || {} };
+  Object.keys(D.rates).forEach(function (c) { S.rates[c] = D.rates[c]; });
+  D.travelers.forEach(function (t) {
+    S.on[t.id] = {};
+    items.forEach(function (it) { S.on[t.id][it.id] = !it.who || it.who.indexOf(t.id) >= 0; });
+  });
+  items.forEach(function (it) {
+    if (it.perDay) S.days[it.id] = it.days || 1;
+    if (it.lo == null) S.ph[it.id] = { lo: null, hi: null };
+  });
+  ['rates', 'days', 'ph'].forEach(function (k) { if (saved[k]) Object.keys(saved[k]).forEach(function (x) { if (x in S[k]) S[k][x] = saved[k][x]; }); });
+  if (typeof saved.sharing === 'boolean') S.sharing = saved.sharing;
+  if (saved.on) Object.keys(saved.on).forEach(function (t) { if (S.on[t]) Object.keys(saved.on[t]).forEach(function (i) { if (i in S.on[t]) S.on[t][i] = !!saved.on[t][i]; }); });
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ version: D.version, rates: S.rates, sharing: S.sharing, days: S.days, on: S.on, ph: S.ph, checks: S.checks })); } catch (e) {} }
+
+  // ---------- money ----------
+  var SYM = { USD: '$', JPY: '¥', KRW: '₩', EUR: '€', GBP: '£', TWD: 'NT$', THB: '฿', CNY: 'CN¥', HKD: 'HK$', CAD: 'C$', AUD: 'A$', MXN: 'MX$', CHF: 'CHF ' };
+  function fmt(v, cur) {
+    if (v == null || !isFinite(v)) return '?';
+    var dec = cur === 'USD' && Math.abs(v) < 20 && Math.round(v) !== v ? 2 : 0;
+    return (SYM[cur] != null ? SYM[cur] : cur + ' ') + v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+  function fmtRange(lo, hi, cur) {
+    if (hi == null || Math.abs(hi - lo) < 1e-9) return fmt(lo, cur);
+    return fmt(lo, cur) + '–' + fmt(hi, cur).replace(/^[^\d-]+/, '');
+  }
+  function toUSD(v, cur) { return cur === 'USD' ? v : v / S.rates[cur]; }
+  function renderPrices(root) {
+    $$('.price[data-cur]', root).forEach(function (el) {
+      var lo = +el.getAttribute('data-lo'), hi = +el.getAttribute('data-hi'), cur = el.getAttribute('data-cur');
+      el.querySelector('.usd').textContent = fmtRange(toUSD(lo, cur), toUSD(hi, cur), 'USD');
+    });
+  }
+
+  // ---------- budget ----------
+  function amounts(it) { return it.lo == null ? S.ph[it.id] : { lo: it.lo, hi: it.hi != null ? it.hi : it.lo }; }
+  function units(it) { return it.perDay ? (+S.days[it.id] || 0) : (it.qty || 1); }
+  function share(it) {
+    if (it.per === 'room') return S.sharing ? 1 / (D.budget.roomSize || 2) : 1;
+    if (it.per === 'group') {
+      var n = D.travelers.filter(function (t) { return S.on[t.id][it.id]; }).length;
+      return n ? 1 / n : 0;
+    }
+    return 1;
+  }
+  function calc() {
+    var res = {};
+    D.travelers.forEach(function (t) {
+      var r = { lo: 0, hi: 0, cats: {} };
+      D.budget.cats.forEach(function (c) { r.cats[c.id] = { lo: 0, hi: 0 }; });
+      items.forEach(function (it) {
+        if (!S.on[t.id][it.id]) return;
+        var a = amounts(it); if (!a || a.lo == null) return;
+        var f = units(it) * share(it);
+        var lo = toUSD(+a.lo, it.cur) * f, hi = toUSD(+(a.hi != null ? a.hi : a.lo), it.cur) * f;
+        r.cats[it.cat].lo += lo; r.cats[it.cat].hi += hi; r.lo += lo; r.hi += hi;
+      });
+      res[t.id] = r;
+    });
+    return res;
+  }
+  var r2 = function (v) { return Math.round(v * 100) / 100; };
+  var usd0 = function (v) { return '$' + Math.round(v).toLocaleString('en-US'); };
+
+  var ui = $('#budget-ui');
+  function buildBudget() {
+    var h = '<div class="totals" id="totals"></div><div class="ctrls">';
+    h += '<label class="tgl"><input type="checkbox" id="sharing"' + (S.sharing ? ' checked' : '') + '> Share rooms (' + (D.budget.roomSize || 2) + ' per room)</label>';
+    Object.keys(S.rates).forEach(function (c) {
+      var info = (D.rateInfo || {})[c] || {};
+      h += '<div class="rate"><span>' + (SYM[c] || c) + ' per $1 <small class="hint">' + (info.src ? '<a href="' + info.src + '" target="_blank" rel="noopener">rate source</a>' : '') + (info.asOf ? ' · ' + info.asOf : '') + '</small></span><input type="number" inputmode="decimal" step="any" min="0" data-rate="' + c + '" value="' + S.rates[c] + '" aria-label="' + c + ' per US dollar"></div>';
+    });
+    h += '</div>';
+    D.budget.cats.forEach(function (cat) {
+      var list = items.filter(function (it) { return it.cat === cat.id; });
+      if (!list.length) return;
+      h += '<div class="cat">' + cat.label + '</div>';
+      list.forEach(function (it) {
+        h += '<div class="item" data-item="' + it.id + '"><div class="lbl">' + esc(it.label) + '</div><div class="row">';
+        if (it.lo == null) {
+          h += '<span class="price ph">not found:</span> <input type="number" inputmode="decimal" step="any" placeholder="low" data-ph="' + it.id + '" data-k="lo" value="' + (S.ph[it.id].lo != null ? S.ph[it.id].lo : '') + '" aria-label="' + esc(it.label) + ' low price in ' + it.cur + '"> <input type="number" inputmode="decimal" step="any" placeholder="high" data-ph="' + it.id + '" data-k="hi" value="' + (S.ph[it.id].hi != null ? S.ph[it.id].hi : '') + '" aria-label="' + esc(it.label) + ' high price in ' + it.cur + '"> ' + it.cur;
+        } else {
+          var hi = it.hi != null ? it.hi : it.lo;
+          h += '<span class="price" data-lo="' + it.lo + '" data-hi="' + hi + '" data-cur="' + it.cur + '"><b class="usd"></b>' + (it.cur !== 'USD' ? ' <span class="loc">' + fmtRange(it.lo, hi, it.cur) + '</span>' : '') + '</span>';
+        }
+        h += ' <span class="unit">' + ({ person: 'per person', room: 'per room', group: 'split' }[it.per]) + (it.perDay ? ' per day' : it.qty > 1 ? ' × ' + it.qty : '') + '</span>';
+        if (it.tag && it.tag !== 'official') h += ' <span class="tag t-' + it.tag + '">' + ({ secondary: 'secondary source', est: 'est', unverified: 'unverified' }[it.tag]) + '</span>';
+        if (it.src) h += ' <a class="src" href="' + esc(it.src) + '" target="_blank" rel="noopener">source</a>';
+        h += '</div>';
+        if (it.perDay) h += '<div class="row"><label class="tgl">Days <input type="number" inputmode="numeric" min="0" step="1" data-days="' + it.id + '" value="' + S.days[it.id] + '" aria-label="' + esc(it.label) + ' days"></label></div>';
+        h += '<div class="row">';
+        D.travelers.forEach(function (t) {
+          h += '<label class="tgl"><input type="checkbox" data-on="' + t.id + '|' + it.id + '"' + (S.on[t.id][it.id] ? ' checked' : '') + '> ' + esc(t.name) + '</label>';
+        });
+        h += '</div>' + (it.note ? '<div class="note">' + esc(it.note) + '</div>' : '') + '</div>';
+      });
+    });
+    ui.innerHTML = h;
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function renderTotals() {
+    var res = calc(), h = '', gLo = 0, gHi = 0;
+    D.travelers.forEach(function (t) {
+      var r = res[t.id]; gLo += r.lo; gHi += r.hi;
+      h += '<div class="tot" data-trav-total="' + t.id + '" data-lo="' + r2(r.lo) + '" data-hi="' + r2(r.hi) + '"><div class="who">' + esc(t.name) + '</div><div class="big">' + usd0(r.lo) + '–' + usd0(r.hi).slice(1) + '</div><table>';
+      D.budget.cats.forEach(function (c) {
+        var x = r.cats[c.id];
+        h += '<tr data-cat="' + c.id + '" data-lo="' + r2(x.lo) + '" data-hi="' + r2(x.hi) + '"><td>' + c.label + '</td><td>' + usd0(x.lo) + '–' + usd0(x.hi).slice(1) + '</td></tr>';
+      });
+      h += '</table></div>';
+    });
+    if (D.travelers.length > 1) h += '<div class="tot" data-group-total data-lo="' + r2(gLo) + '" data-hi="' + r2(gHi) + '"><div class="who">Everyone</div><div class="big">' + usd0(gLo) + '–' + usd0(gHi).slice(1) + '</div></div>';
+    $('#totals').innerHTML = h;
+  }
+  function recalc() { renderPrices(document); renderTotals(); save(); }
+  buildBudget();
+  ui.addEventListener('input', function (e) {
+    var el = e.target, v;
+    if (el.hasAttribute('data-rate')) { v = parseFloat(el.value); if (v > 0) S.rates[el.getAttribute('data-rate')] = v; }
+    else if (el.hasAttribute('data-days')) { v = parseInt(el.value, 10); S.days[el.getAttribute('data-days')] = v >= 0 ? v : 0; }
+    else if (el.hasAttribute('data-ph')) { v = parseFloat(el.value); S.ph[el.getAttribute('data-ph')][el.getAttribute('data-k')] = isFinite(v) ? v : null; }
+    else return;
+    recalc();
+  });
+  ui.addEventListener('change', function (e) {
+    var el = e.target;
+    if (el.id === 'sharing') S.sharing = el.checked;
+    else if (el.hasAttribute('data-on')) { var p = el.getAttribute('data-on').split('|'); S.on[p[0]][p[1]] = el.checked; }
+    else return;
+    recalc();
+  });
+  $$('[data-check]').forEach(function (cb) {
+    cb.checked = !!S.checks[cb.getAttribute('data-check')];
+    cb.addEventListener('change', function () { S.checks[cb.getAttribute('data-check')] = cb.checked; save(); });
+  });
+  recalc();
+
+  // ---------- map ----------
+  var svg = $('#map');
+  var stops = D.stops, byId = {};
+  stops.forEach(function (s) { byId[s.id] = s; });
+  var HOME = D.map.home, LIM = D.map.limit;
+  var vb = { x: HOME.x, y: HOME.y, w: HOME.w, h: HOME.h }, anim = null, activeLeg = 'all';
+  var markerEls = {}, labelEls = {};
+  $$('.stop', svg).forEach(function (g) { markerEls[g.getAttribute('data-stop')] = g; });
+  $$('.labels text', svg).forEach(function (t) { labelEls[t.getAttribute('data-stop')] = t; });
+
+  function rect() { return svg.getBoundingClientRect(); }
+  function aspect() { var r = rect(); return r.width > 0 && r.height > 0 ? r.width / r.height : 1.5; }
+  function fit(b) {
+    var a = aspect(), x = b.x, y = b.y, w = b.w, h = b.h;
+    if (w / h > a) { var nh = w / a; y -= (nh - h) / 2; h = nh; } else { var nw = h * a; x -= (nw - w) / 2; w = nw; }
+    return { x: x, y: y, w: w, h: h };
+  }
+  function clamp(v) {
+    var a = aspect(), minW = HOME.w / 30, maxW = Math.min(LIM.w, LIM.h * a);
+    var w = Math.max(minW, Math.min(maxW, v.w)), h = w / a;
+    var cx = v.x + v.w / 2, cy = v.y + v.h / 2;
+    cx = Math.max(LIM.x + w / 2, Math.min(LIM.x + LIM.w - w / 2, cx));
+    cy = Math.max(LIM.y + h / 2, Math.min(LIM.y + LIM.h - h / 2, cy));
+    return { x: cx - w / 2, y: cy - h / 2, w: w, h: h };
+  }
+  function scale() { var r = rect(); return r.width ? vb.w / r.width : 1; }
+  function setVB(v) {
+    vb = clamp(v);
+    svg.setAttribute('viewBox', vb.x.toFixed(2) + ' ' + vb.y.toFixed(2) + ' ' + vb.w.toFixed(2) + ' ' + vb.h.toFixed(2));
+    var s = scale();
+    svg.style.setProperty('--s', s.toFixed(4));
+    stops.forEach(function (st) { markerEls[st.id].firstChild.setAttribute('r', (7 * s).toFixed(2)); });
+    layoutLabels(s);
+  }
+  function screenPos(id) {
+    var st = byId[id], r = rect();
+    return { x: r.left + (st.x - vb.x) / vb.w * r.width, y: r.top + (st.y - vb.y) / vb.h * r.height };
+  }
+  function layoutLabels(s) {
+    var r = rect(), placed = [], fs = 12.5;
+    var order = stops.slice().sort(function (a, b) { return (b.major ? 1 : 0) - (a.major ? 1 : 0); });
+    var dimmed = function (id) { return markerEls[id].classList.contains('dim'); };
+    order.sort(function (a, b) { return (dimmed(a.id) ? 1 : 0) - (dimmed(b.id) ? 1 : 0); });
+    // markers themselves are obstacles too
+    var obstacles = stops.map(function (st) { var p = screenPos(st.id); return { x: p.x - 7, y: p.y - 7, w: 14, h: 14, id: st.id }; });
+    var zc = document.querySelector('.zoom');
+    if (zc) { var zr = zc.getBoundingClientRect(); obstacles.push({ x: zr.left - 4, y: zr.top - 4, w: zr.width + 8, h: zr.height + 8, id: '_zoom' }); }
+    order.forEach(function (st) {
+      var t = labelEls[st.id], p = screenPos(st.id);
+      var w = st.name.length * fs * 0.6 + 4, h = fs + 4, ok = null;
+      var cands = [{ x: p.x + 10, y: p.y - h / 2, a: 'start' }, { x: p.x - 10 - w, y: p.y - h / 2, a: 'end' }, { x: p.x - w / 2, y: p.y - 12 - h, a: 'middle' }, { x: p.x - w / 2, y: p.y + 10, a: 'middle' }];
+      for (var i = 0; i < cands.length && !ok; i++) {
+        var c = cands[i], box = { x: c.x, y: c.y, w: w, h: h };
+        if (box.x < r.left + 2 || box.x + w > r.right - 2 || box.y < r.top + 2 || box.y + h > r.bottom - 2) continue;
+        var hit = placed.concat(obstacles.filter(function (o) { return o.id !== st.id; })).some(function (o) { return box.x < o.x + o.w && box.x + box.w > o.x && box.y < o.y + o.h && box.y + box.h > o.y; });
+        if (!hit) ok = c;
+      }
+      if (!ok || dimmed(st.id) && placed.length > 3) { t.classList.add('off'); return; }
+      placed.push({ x: ok.x, y: ok.y, w: w, h: h });
+      t.classList.remove('off');
+      var ax = ok.a === 'start' ? ok.x : ok.a === 'end' ? ok.x + w : ok.x + w / 2;
+      t.setAttribute('x', (vb.x + (ax - r.left) * s).toFixed(2));
+      t.setAttribute('y', (vb.y + (ok.y + h - 4 - r.top) * s).toFixed(2));
+      t.setAttribute('text-anchor', ok.a);
+      t.setAttribute('font-size', (fs * s).toFixed(2));
+    });
+  }
+  function animateTo(target) {
+    var to = clamp(fit(target));
+    if (anim) cancelAnimationFrame(anim.raf);
+    if (reduceMQ.matches) { anim = null; setVB(to); return; }
+    var from = { x: vb.x, y: vb.y, w: vb.w, h: vb.h }, t0 = performance.now(), dur = 450;
+    anim = {};
+    (function step(now) {
+      var k = Math.min(1, (now - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setVB({ x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e, w: from.w + (to.w - from.w) * e, h: from.h + (to.h - from.h) * e });
+      if (k < 1) anim.raf = requestAnimationFrame(step); else anim = null;
+    })(t0);
+  }
+  function boxFor(ids) {
+    var xs = ids.map(function (i) { return byId[i].x; }), ys = ids.map(function (i) { return byId[i].y; });
+    var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
+    var w = Math.max(x1 - x0, HOME.w * 0.06), h = Math.max(y1 - y0, HOME.w * 0.06), pad = Math.max(w, h) * 0.35;
+    return { x: (x0 + x1) / 2 - w / 2 - pad, y: (y0 + y1) / 2 - h / 2 - pad, w: w + 2 * pad, h: h + 2 * pad };
+  }
+  function zoomBy(k, cx, cy) {
+    var r = rect();
+    if (cx == null) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+    var ux = vb.x + (cx - r.left) / r.width * vb.w, uy = vb.y + (cy - r.top) / r.height * vb.h;
+    var w = vb.w * k, h = vb.h * k;
+    return { x: ux - (cx - r.left) / r.width * w, y: uy - (cy - r.top) / r.height * h, w: w, h: h };
+  }
+
+  // touch / mouse: one finger pans, two fingers pinch, a still tap opens the nearest stop (26px radius)
+  var pts = {}, g = null;
+  function list() { return Object.keys(pts).map(function (k) { return pts[k]; }); }
+  function nearest(x, y) {
+    var best = null, bd = 26;
+    stops.forEach(function (st) {
+      var p = screenPos(st.id), d = Math.hypot(p.x - x, p.y - y);
+      if (markerEls[st.id].classList.contains('dim')) d += 6; // prefer stops in the current leg
+      if (d <= bd) { bd = d; best = st; }
+    });
+    return best;
+  }
+  svg.addEventListener('pointerdown', function (e) {
+    if (e.button > 0) return;
+    e.preventDefault();
+    try { svg.setPointerCapture(e.pointerId); } catch (x) {}
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var L = list();
+    if (anim) { cancelAnimationFrame(anim.raf); anim = null; }
+    if (L.length === 1) g = { type: 'tap', x0: e.clientX, y0: e.clientY, vb0: { x: vb.x, y: vb.y, w: vb.w, h: vb.h } };
+    else if (L.length === 2) g = { type: 'pinch', d0: Math.hypot(L[0].x - L[1].x, L[0].y - L[1].y) || 1, vb0: { x: vb.x, y: vb.y, w: vb.w, h: vb.h }, m0: { x: (L[0].x + L[1].x) / 2, y: (L[0].y + L[1].y) / 2 } };
+  });
+  svg.addEventListener('pointermove', function (e) {
+    if (!pts[e.pointerId] || !g) return;
+    e.preventDefault();
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var r = rect(), L = list();
+    if ((g.type === 'tap' || g.type === 'pan') && L.length === 1) {
+      var dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+      if (g.type === 'tap' && Math.hypot(dx, dy) > 8) g.type = 'pan';
+      if (g.type === 'pan') setVB({ x: g.vb0.x - dx * g.vb0.w / r.width, y: g.vb0.y - dy * g.vb0.h / r.height, w: g.vb0.w, h: g.vb0.h });
+    } else if (g.type === 'pinch' && L.length === 2) {
+      var d = Math.hypot(L[0].x - L[1].x, L[0].y - L[1].y) || 1, m = { x: (L[0].x + L[1].x) / 2, y: (L[0].y + L[1].y) / 2 };
+      var w = g.vb0.w * g.d0 / d, h = g.vb0.h * g.d0 / d;
+      var ux = g.vb0.x + (g.m0.x - r.left) / r.width * g.vb0.w, uy = g.vb0.y + (g.m0.y - r.top) / r.height * g.vb0.h;
+      setVB({ x: ux - (m.x - r.left) / r.width * w, y: uy - (m.y - r.top) / r.height * h, w: w, h: h });
+    }
+  });
+  function up(e) {
+    if (!pts[e.pointerId]) return;
+    if (g && g.type === 'tap' && list().length === 1 && e.type === 'pointerup') {
+      var st = nearest(e.clientX, e.clientY);
+      if (st) openCard(st.id); else closeCard();
+    }
+    delete pts[e.pointerId];
+    if (!list().length) g = null; else if (g && g.type === 'pinch') g = { type: 'done' };
+  }
+  svg.addEventListener('pointerup', up);
+  svg.addEventListener('pointercancel', up);
+  svg.addEventListener('wheel', function (e) { e.preventDefault(); setVB(zoomBy(Math.exp(e.deltaY * 0.0015), e.clientX, e.clientY)); }, { passive: false });
+  svg.addEventListener('keydown', function (e) {
+    var t = e.target.closest && e.target.closest('.stop');
+    if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCard(t.getAttribute('data-stop')); }
+  });
+  $('#zin').addEventListener('click', function () { animateTo(zoomBy(0.6)); });
+  $('#zout').addEventListener('click', function () { animateTo(zoomBy(1 / 0.6)); });
+  $('#zhome').addEventListener('click', function () { selectLeg('all'); });
+
+  // ---------- legs ----------
+  var legBtns = $$('.leg'), days = $$('.day');
+  function selectLeg(id) {
+    activeLeg = id;
+    legBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-leg') === id)); });
+    var leg = D.legs.filter(function (l) { return l.id === id; })[0];
+    var n = 0;
+    days.forEach(function (d) { var show = id === 'all' || d.getAttribute('data-leg').split(' ').indexOf(id) >= 0; d.hidden = !show; if (show) n++; });
+    $$('.route', svg).forEach(function (p) { p.classList.toggle('dim', id !== 'all' && p.getAttribute('data-leg') !== id); });
+    stops.forEach(function (st) { markerEls[st.id].classList.toggle('dim', id !== 'all' && leg.stops.indexOf(st.id) < 0); });
+    $('#showing').textContent = id === 'all' ? 'Showing all ' + n + ' days' : 'Showing ' + n + ' day' + (n === 1 ? '' : 's') + ' · ' + leg.name;
+    animateTo(id === 'all' ? HOME : boxFor(leg.stops.length ? leg.stops : stops.map(function (s) { return s.id; })));
+  }
+  legBtns.forEach(function (b) { b.addEventListener('click', function () { selectLeg(b.getAttribute('data-leg')); }); });
+
+  // ---------- stop card ----------
+  var sheet = $('#sheet'), body = $('#sheet-body'), openId = null;
+  function openCard(id) {
+    var tpl = document.getElementById('card-' + id);
+    if (!tpl) return;
+    body.innerHTML = '';
+    body.appendChild(tpl.content.cloneNode(true));
+    var h = body.querySelector('h2'); if (h) h.id = 'sheet-title';
+    renderPrices(body);
+    sheet.hidden = false; sheet.scrollTop = 0;
+    if (openId) markerEls[openId].classList.remove('sel');
+    openId = id; markerEls[id].classList.add('sel');
+  }
+  function closeCard() { sheet.hidden = true; if (openId) markerEls[openId].classList.remove('sel'); openId = null; }
+  $('#sheet-close').addEventListener('click', closeCard);
+  sheet.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeCard(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCard(); });
+
+  var rz;
+  window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { setVB(fit(vb)); }, 100); });
+  selectLeg('all');
+  if (anim) { cancelAnimationFrame(anim.raf); anim = null; }
+  setVB(fit(HOME));
+
+  // test hook used by the trip-map checks
+  window.__tripMap = { screenPos: screenPos, idle: function () { return !anim; }, viewBox: function () { return [vb.x, vb.y, vb.w, vb.h]; }, calc: calc };
+})();
+</script>
+</body>
+</html>
