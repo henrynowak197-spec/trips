@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101418" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bay Area: Tech, AI, Robotics &amp; Law">
+<meta name="trip-version" content="2026-11-25T00:50:25.873Z">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Bay Area: Tech, AI, Robotics &amp; Law</title>
+<style>:root{--bg:#f4f6f8;--fg:#15202b;--muted:#5b6770;--card:#fff;--line:#d9dfe4;--sea:#dcebf5;--land:#e9efe3;--land-on:#cfe3c4;--coast:#6f8f5f;--accent:#0b6e8f;--chip:#eef2f5;--warn:#9a5b00;--warnbg:#fff2dc;--bad:#a1271b;--badbg:#fde6e3;--sec:#4b4f9a;--secbg:#e8e9fb;--ok:#1f7a3a;--okbg:#e2f5e7;--shadow:0 6px 24px rgba(0,0,0,.18);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#101418;--fg:#e6edf3;--muted:#9aa7b2;--card:#1a2129;--line:#2d3742;--sea:#0f2533;--land:#26302a;--land-on:#2f4430;--coast:#7fa36d;--accent:#5cc3e6;--chip:#242d36;--warn:#ffc46b;--warnbg:#3a2a0c;--bad:#ff8a7d;--badbg:#3d1714;--sec:#b8bbff;--secbg:#23264a;--ok:#7ad68f;--okbg:#14301c;--shadow:0 6px 24px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow-x:hidden;touch-action:manipulation}
+a{color:var(--accent);overflow-wrap:anywhere}
+h1{font-size:1.5rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.25rem;margin:.2em 0 .5em}
+h3{font-size:1.05rem;margin:0}
+h4{font-size:.95rem;margin:.8em 0 .3em}
+.top{padding:12px 16px 6px}
+.sub{margin:.2em 0;color:var(--muted)}
+.meta{margin:.2em 0;font-weight:600}
+.checked{font-size:.8rem;color:var(--muted);margin:.4em 0}
+.mapwrap{position:relative;margin:0 8px;height:min(50vh,560px);min-height:220px;border-radius:14px;overflow:hidden;background:var(--sea);border:1px solid var(--line)}
+#map{display:block;width:100%;height:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:grab;--s:1}
+#map:focus,#map *:focus{outline:none}
+#map .stop:focus-visible circle{stroke:var(--fg);stroke-width:calc(3px * var(--s))}
+.sea{fill:var(--sea)}
+.land path{fill:var(--land);stroke:var(--coast);stroke-width:calc(.6px * var(--s));stroke-linejoin:round}
+.land path.on{fill:var(--land-on)}
+.route{fill:none;stroke-width:calc(3.5px * var(--s));stroke-linecap:round;opacity:.9;transition:opacity .2s}
+.route.opt{stroke-dasharray:calc(7px * var(--s)) calc(6px * var(--s));stroke-width:calc(2.5px * var(--s))}
+.stop circle{stroke:#fff;stroke-width:calc(2px * var(--s));transition:opacity .2s}
+.stop.sel circle{stroke:var(--fg);stroke-width:calc(3px * var(--s))}
+.dim{opacity:.18}
+.labels text{fill:var(--fg);paint-order:stroke;stroke:var(--sea);stroke-width:calc(3px * var(--s));stroke-linejoin:round;font-weight:600;pointer-events:none}
+.labels text.off{display:none}
+.zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:22px;line-height:1;box-shadow:var(--shadow)}
+.legs{display:flex;gap:8px;overflow-x:auto;padding:10px 8px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.legs::-webkit-scrollbar{display:none}
+.leg{flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:.95rem;display:inline-flex;align-items:center;gap:8px}
+.leg i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.leg[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.showing{margin:2px 16px 0;font-size:.85rem;color:var(--muted);min-height:1.2em}
+main{padding:0 8px 40px;max-width:760px;margin:0 auto}
+.day,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.day header{display:flex;gap:10px;align-items:flex-start}
+.dnum{flex:0 0 auto;width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;display:grid;place-items:center;font-size:.85rem;margin-top:2px}
+.ddate{font-size:.85rem;color:var(--muted)}
+.getting{background:var(--chip);border-radius:10px;padding:10px 12px;margin:10px 0}
+.g-head{font-weight:600}
+.mode{display:inline-block;background:var(--accent);color:var(--card);border-radius:6px;padding:0 6px;font-size:.8rem;margin-right:4px}
+.g-row{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:2px}
+.g-notes{margin:.4em 0 0;font-size:.9rem}
+.plan{padding-left:1.2em;margin:.6em 0}
+.plan li{margin:.25em 0}
+.events{border-left:3px solid var(--accent);padding-left:10px}
+.event{margin:.5em 0}
+.enote{font-size:.85rem;color:var(--muted)}
+.st{font-size:.75rem;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.st-confirmed{background:var(--okbg);color:var(--ok)}
+.st-unconfirmed{background:var(--warnbg);color:var(--warn)}
+details.tips{margin-top:8px}
+details.tips summary,.panel summary{min-height:44px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+.price .usd{font-weight:700}
+.price .loc,.unit{color:var(--muted);font-size:.85em}
+.price.ph{color:var(--bad)}
+.tag{font-size:.7rem;border-radius:6px;padding:1px 5px;white-space:nowrap;vertical-align:1px}
+.t-secondary{background:var(--secbg);color:var(--sec)}
+.t-est{background:var(--warnbg);color:var(--warn)}
+.t-unverified{background:var(--badbg);color:var(--bad)}
+.src{font-size:.8rem;white-space:nowrap}
+.hint{font-size:.85rem;color:var(--muted)}
+.checklist{list-style:none;padding:0;margin:0}
+.checklist li{margin:4px 0}
+.chk{display:inline-flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 0}
+.chk input,.tgl input{width:22px;height:22px;flex:0 0 auto;margin:1px 0 0;accent-color:var(--accent)}
+.sources{padding-left:1.1em;font-size:.85rem}
+.sources .path{color:var(--muted);overflow-wrap:anywhere}
+/* budget */
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.tot{background:var(--chip);border-radius:12px;padding:10px}
+.tot .who{font-weight:700}
+.tot .big{font-size:1.15rem;font-weight:800}
+.tot table{width:100%;font-size:.8rem;border-collapse:collapse;margin-top:4px}
+.tot td{padding:1px 0}
+.tot td:last-child{text-align:right;white-space:nowrap}
+.ctrls{display:grid;gap:8px;margin:10px 0}
+.ctrls label,.rate{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+input[type=number],input[type=text]{font-size:16px;min-height:44px;width:7.5em;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.tgl{display:inline-flex;align-items:center;gap:8px;min-height:44px;min-width:44px;padding:0 4px}
+.cat{margin:14px 0 4px;font-weight:700;border-bottom:1px solid var(--line);padding-bottom:2px}
+.item{padding:8px 0;border-bottom:1px dashed var(--line)}
+.item .lbl{font-weight:600}
+.item .row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.item .note{font-size:.8rem;color:var(--muted)}
+/* bottom sheet */
+#sheet{position:fixed;left:8px;right:8px;bottom:0;max-height:min(50vh,480px);overflow:auto;overscroll-behavior:contain;background:var(--card);color:var(--fg);border-radius:16px 16px 0 0;box-shadow:var(--shadow);padding:14px 16px calc(16px + env(safe-area-inset-bottom));z-index:10;max-width:760px;margin:0 auto}
+#sheet[hidden]{display:none}
+#sheet .close{position:sticky;float:right;top:0;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:24px;line-height:1}
+#sheet h2{margin-right:52px}
+.cdates{color:var(--muted);margin-top:0}
+.costs{padding-left:1.1em}
+.btn-link{display:inline-flex;align-items:center;min-height:44px;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (min-width:900px){.mapwrap{max-width:1100px;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Bay Area: Tech, AI, Robotics &amp; Law</h1>
+  <p class="sub">A week based in Berkeley: Stanford CodeX FutureLaw Week, SF AI and robotics meetups, a redwoods day with your cousin</p>
+  <p class="meta">Sat, Mar 27 – Sat, Apr 3 · Henry</p>
+  <p class="checked">Prices and rules checked 2026-11-24. USD first, local price in grey. Labels: <span class="tag t-secondary">secondary source</span> <span class="tag t-est">est</span> <span class="tag t-unverified">unverified</span>; unlabeled items come from official sources.</p>
+</header>
+
+<section class="mapwrap" aria-label="Trip map">
+  <svg id="map" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid meet" role="application" aria-label="Map. Drag to pan, pinch to zoom, tap a stop for details.">
+    <rect class="sea" x="-600" y="-540" width="2200" height="1980.0000000000002"/>
+    <g class="land"><path class="on" d="M999.9,1440L956.7,1373.6L663.9,1306.5L426.8,1028.7L412,813.1L319.3,592.5L319.3,450.4L304.5,294.6L374.9,260.7L437.9,274.2L434.2,335.3L452.7,445.9L526.8,529.4L597.2,565.5L663.9,646.6L712.1,671.3L760.3,678.1L734.3,626.3L704.7,592.5L671.4,484.3L604.7,346.6L530.5,272L489.8,133.9L456.4,100L437.9,50.1L512,-11.1L612.1,-54.2L745.5,-67.8L1127.1,-47.4L1204.9,-81.4L1275.3,-70.1L1323.5,-74.6L1219.8,-110.9L1160.5,-99.6L1093.8,-106.4L956.7,-99.6L901.1,-115.5L841.8,-158.6L801,-163.1L675.1,-88.2L619.5,-97.3L486.1,-179L430.5,-190.4L337.9,-145L323,59.2L352.7,208.6L297.1,224.5L234.1,163.4L134.1,124.9L52.5,68.3L-66,-36L-125.3,-74.6L-192,13.9L-195.7,-27L-162.4,-129.1L-173.5,-299.5L-69.7,-163.1L-99.4,-258.6L-180.9,-365.5L-243.9,-401.9L-298,-540L1600,-540L1600,1440Z"/></g>
+    <g class="routes"><path class="route" data-leg="arrive" style="stroke:#2b8a3e" d="M608.1 372.7L553.2 165.7"><title>BART from Oakland Airport to Downtown Berkeley, about 36 min</title></path><path class="route opt" data-leg="arrive" style="stroke:#2b8a3e" d="M444.1 491.4L553.2 165.7"><title>Alternative: fly into SFO, BART about 55 min with one transfer</title></path><path class="route" data-leg="arrive" style="stroke:#2b8a3e" d="M553.2 165.7L245.6 140"><title>Drive with your cousin over the Richmond–San Rafael Bridge to Muir Woods</title></path><path class="route" data-leg="stanford" style="stroke:#c2255c" d="M553.2 165.7L661.3 747.3"><title>BART to Millbrae, then Caltrain to Palo Alto</title></path><path class="route opt" data-leg="stanford" style="stroke:#c2255c" d="M661.3 747.3L754.4 760"><title>Optional: Caltrain one stop to Mountain View for the Computer History Museum</title></path><path class="route" data-leg="sf" style="stroke:#1c5bd8" d="M553.2 165.7L421.5 279.7"><title>BART Downtown Berkeley → Powell St, about 26 min</title></path><path class="route" data-leg="home" style="stroke:#e8590c" d="M553.2 165.7L608.1 372.7"><title>BART back to Oakland Airport</title></path></g>
+    <g class="markers"><g class="stop" data-stop="oak" data-legs="arrive home" tabindex="0" role="button" aria-label="Oakland Airport: open details"><circle cx="608.1" cy="372.7" r="7" style="fill:#2b8a3e"/></g><g class="stop" data-stop="sfo" data-legs="arrive" tabindex="0" role="button" aria-label="SFO: open details"><circle cx="444.1" cy="491.4" r="7" style="fill:#2b8a3e"/></g><g class="stop" data-stop="berkeley" data-legs="arrive stanford sf home" tabindex="0" role="button" aria-label="Berkeley: open details"><circle cx="553.2" cy="165.7" r="7" style="fill:#2b8a3e"/></g><g class="stop" data-stop="sf" data-legs="sf" tabindex="0" role="button" aria-label="San Francisco (SoMa): open details"><circle cx="421.5" cy="279.7" r="7" style="fill:#1c5bd8"/></g><g class="stop" data-stop="stanford" data-legs="stanford" tabindex="0" role="button" aria-label="Stanford Law: open details"><circle cx="661.3" cy="747.3" r="7" style="fill:#c2255c"/></g><g class="stop" data-stop="chm" data-legs="stanford" tabindex="0" role="button" aria-label="Computer History Museum: open details"><circle cx="754.4" cy="760" r="7" style="fill:#c2255c"/></g><g class="stop" data-stop="muir" data-legs="arrive" tabindex="0" role="button" aria-label="Muir Woods: open details"><circle cx="245.6" cy="140" r="7" style="fill:#2b8a3e"/></g></g>
+    <g class="labels" aria-hidden="true"><text data-stop="oak" x="608.1" y="372.7">Oakland Airport</text><text data-stop="sfo" x="444.1" y="491.4">SFO</text><text data-stop="berkeley" x="553.2" y="165.7">Berkeley</text><text data-stop="sf" x="421.5" y="279.7">San Francisco (SoMa)</text><text data-stop="stanford" x="661.3" y="747.3">Stanford Law</text><text data-stop="chm" x="754.4" y="760">Computer History Museum</text><text data-stop="muir" x="245.6" y="140">Muir Woods</text></g>
+  </svg>
+  <div class="zoom">
+    <button type="button" id="zin" aria-label="Zoom in">+</button>
+    <button type="button" id="zout" aria-label="Zoom out">−</button>
+    <button type="button" id="zhome" aria-label="Show whole trip">⤢</button>
+  </div>
+</section>
+
+<nav class="legs" aria-label="Trip legs"><button type="button" class="leg" data-leg="all" aria-pressed="true">All</button><button type="button" class="leg" data-leg="arrive" aria-pressed="false"><i style="background:#2b8a3e"></i>Arrive + redwoods</button><button type="button" class="leg" data-leg="stanford" aria-pressed="false"><i style="background:#c2255c"></i>Stanford FutureLaw</button><button type="button" class="leg" data-leg="sf" aria-pressed="false"><i style="background:#1c5bd8"></i>SF tech &amp; AI</button><button type="button" class="leg" data-leg="home" aria-pressed="false"><i style="background:#e8590c"></i>Robotics + home</button></nav>
+<p class="showing" id="showing" aria-live="polite"></p>
+
+<main>
+  <section id="days" aria-label="Day by day"><article class="day" id="day-2027-03-27" data-leg="arrive" data-stop="berkeley">
+<header><span class="dnum" style="background:#2b8a3e">1</span><div><div class="ddate">Sat, Mar 27 · Berkeley</div><h3>Fly in, BART to Berkeley</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">Flight</span> Buffalo BUF → Oakland OAK (or SFO)</div>
+<div class="g-row"><span>⏱ ≈ 7–12 h with one connection</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.kayak.com/flight-routes/Buffalo-BUF/San-Francisco-SFO" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">No nonstops from Buffalo. Compare OAK and SFO on the same dates; OAK saves about 20 minutes and a transfer on the ride to Berkeley. Southwest has no change fees. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-buffalo-niagara-falls-to-oakland" target="_blank" rel="noopener">source</a></p></div><div class="getting"><div class="g-head"><span class="mode">BART</span> Oakland Airport → Downtown Berkeley</div>
+<div class="g-row"><span>⏱ ≈ 36 min</span><span><span class="price" data-lo="9.3" data-hi="10.5" data-cur="USD"><b class="usd">$9.30–10.50</b></span> <span class="unit">one way, includes airport connector</span> <span class="tag t-est">est</span> <a class="src" href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Tap your bank card or phone at the gate. Change at Coliseum from the airport connector to a Richmond-bound train. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://bart.gov/guide/airport/oak" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Land, BART to Downtown Berkeley, settle in at your cousin&#39;s.</li><li>Easy dinner in Berkeley; early night before the redwoods.</li></ul>
+
+<details class="tips"><summary>Local tips</summary><ul><li>Tap a contactless bank card or phone wallet at BART, Muni and Caltrain gates (Clipper &#39;Tap and Ride&#39;, regionwide since Dec 2025). Adult fares only, one rider per card.  <a class="src" href="https://www.mtc.ca.gov/node/4040619" target="_blank" rel="noopener">source</a></li><li>A FIRST Robotics district event runs at Berkeley High School Apr 2–4, 2027; spectators are welcome Apr 3–4 and admission is free.  <a class="src" href="https://cafirst.org/frc/east-bay/" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-03-28" data-leg="arrive" data-stop="muir">
+<header><span class="dnum" style="background:#2b8a3e">2</span><div><div class="ddate">Sun, Mar 28 · Muir Woods</div><h3>Redwoods day: Muir Woods with your cousin</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">Car</span> Berkeley → Muir Woods</div>
+<div class="g-row"><span>⏱ ≈ 1 h each way</span><span><span class="price" data-lo="8.5" data-hi="9" data-cur="USD"><b class="usd">$8.50–9</b></span> <span class="unit">Richmond–San Rafael Bridge toll, westbound only</span> <span class="tag t-est">est</span> <a class="src" href="https://mtc.ca.gov/about-mtc/authorities/bay-area-toll-authority/2026-toll-increase-high-occupancy-vehicle-hov-policy-updates" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Go out via I-580 and the Richmond–San Rafael Bridge, then US-101 and Hwy 1. Coming back the same way is toll-free. Coming back through SF instead costs a Golden Gate Bridge toll ($10.25 FasTrak). <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.goldengate.org/golden-gate-bridge-toll-rates-increase-july-1-2026/" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Mar 28 is Easter Sunday, so book the earliest parking slot you can; the lot fills on busy days.</li><li>Main Trail loop to Cathedral Grove (about 2 miles, 1.5–2 h). Add the Hillside or Ben Johnson trail if you want a real hike.</li><li>Optional on the way back: Sausalito or the Marin Headlands view of the Golden Gate (Golden Gate toll if you return through SF).</li></ul>
+
+<details class="tips"><summary>Local tips</summary><ul><li>Reservation fees still apply on park fee-free days; full refund if you cancel at least 72 hours ahead.  <a class="src" href="https://www.nps.gov/muwo/planyourvisit/reservations.htm" target="_blank" rel="noopener">source</a></li><li>A parking or shuttle reservation is required, plus a $15 entrance fee for ages 16+.  <a class="src" href="https://www.nps.gov/muwo/planyourvisit/fees.htm" target="_blank" rel="noopener">source</a></li><li>The Main Trail loop is about 2 miles and 1.5–2 hours; Cathedral Grove is a designated quiet zone.  <a class="src" href="https://www.nps.gov/goga/planyourvisit/muir-woods-main-trail.htm" target="_blank" rel="noopener">source</a></li><li>Open 8:00 a.m. until about sunset; cell service is poor, so load your reservation before you go.  <a class="src" href="https://www.nps.gov/muwo/planyourvisit/hours.htm" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-03-29" data-leg="stanford" data-stop="stanford">
+<header><span class="dnum" style="background:#c2255c">3</span><div><div class="ddate">Mon, Mar 29 · Stanford Law</div><h3>FutureLaw Week opens at Stanford</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">BART + Caltrain</span> Downtown Berkeley → Palo Alto</div>
+<div class="g-row"><span>⏱ ≈ 1 h 45 min – 2 h door to door</span><span><span class="price" data-lo="6.25" data-hi="6.25" data-cur="USD"><b class="usd">$6.25</b></span> <span class="unit">Caltrain leg, one way (BART leg extra)</span>  <a class="src" href="https://www.caltrain.com/Fares" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">BART to Millbrae, cross-platform to Caltrain, ride to Palo Alto, then the free Marguerite shuttle or a 20-minute walk to the Law School. Check Caltrain express times; local trains are slower. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.caltrain.com/media/36271" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>CodeX FutureLaw Week sessions (2027 agenda not out yet).</li><li>Head back in time to avoid the late Caltrain gaps.</li></ul>
+<div class="events"><h4>Event options</h4><div class="event"><b>CodeX FutureLaw Week 2027</b> <span class="st st-confirmed">dates confirmed</span><div>Mon Mar 29 – Fri Apr 2, 2027, Paul Brest Hall, Stanford Law School. Daily schedule TBA. · <span class="price" data-lo="370" data-hi="470" data-cur="USD"><b class="usd">$370–470</b></span> <span class="unit">registration</span> <span class="tag t-est">est</span> <a class="src" href="https://conferences.law.stanford.edu/futurelaw2026/rates-and-registration/" target="_blank" rel="noopener">source</a></div><div class="enote">An older sponsorship page still says &#39;tentatively April 2027&#39;, so watch the official page for the final schedule.</div><a class="src" href="https://conferences.law.stanford.edu/futurelaw/" target="_blank" rel="noopener">source</a></div></div>
+<details class="tips"><summary>Local tips</summary><ul><li>CodeX FutureLaw Week 2027 is listed for March 29 – April 2, 2027 at Stanford Law School&#39;s Paul Brest Hall.  <a class="src" href="https://conferences.law.stanford.edu/futurelaw/" target="_blank" rel="noopener">source</a></li><li>From Berkeley: BART to Millbrae, then Caltrain to Palo Alto, plus a walk or campus shuttle. Caltrain&#39;s 2-zone adult fare (Millbrae zone 2 → Palo Alto zone 3) is $6.25.  <a class="src" href="https://www.caltrain.com/Fares" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-03-30" data-leg="sf" data-stop="sf">
+<header><span class="dnum" style="background:#1c5bd8">4</span><div><div class="ddate">Tue, Mar 30 · San Francisco (SoMa)</div><h3>SF: AI and robotics meetups</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">BART</span> Downtown Berkeley → Powell St / Montgomery</div>
+<div class="g-row"><span>⏱ ≈ 26 min</span><span><span class="price" data-lo="3" data-hi="4" data-cur="USD"><b class="usd">$3–4</b></span> <span class="unit">one way</span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Uber is about $40 each way on average; use it for late-night returns. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Daytime: walk SoMa and the Moscone area; try a Waymo robotaxi ride across the city.</li><li>Evening: a physical-AI / robotics meetup from Luma (pick one 1–2 weeks out).</li></ul>
+<div class="events"><h4>Event options</h4><div class="event"><b>SF Hardware Meetup (physical AI / robotics demos)</b> <span class="st st-unconfirmed">dates unconfirmed</span><div>Monthly series; no date posted for this week yet.</div><div class="enote">Past editions had humanoid-robot themes and sold out.</div><a class="src" href="https://luma.com/84lattht" target="_blank" rel="noopener">source</a></div><div class="event"><b>Physical AI &amp; Robotics Meetup, Frontier Tower SF</b> <span class="st st-unconfirmed">dates unconfirmed</span><div>Recurring; no 2027 dates posted yet.</div><div class="enote">Registration often closes or goes waitlist-only.</div><a class="src" href="https://luma.com/physical-ai-meetup" target="_blank" rel="noopener">source</a></div></div>
+<details class="tips"><summary>Local tips</summary><ul><li>BART Downtown Berkeley → Powell St is about 26 minutes and $3–4; an Uber is about $40 on average for the same trip. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></li><li>A Muni single ride is $3.00 from Jan 4, 2027 (Clipper discount ends).  <a class="src" href="https://www.sfmta.com/ar/node/46055" target="_blank" rel="noopener">source</a></li><li>Recurring physical-AI and robotics meetups (SF Hardware Meetup, Frontier Tower Physical AI meetup) post dates on Luma; popular ones fill up or go waitlist-only. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://luma.com/physical-ai-meetup" target="_blank" rel="noopener">source</a></li></ul></details>
+</article>
+<article class="day" id="day-2027-03-31" data-leg="stanford" data-stop="stanford">
+<header><span class="dnum" style="background:#c2255c">5</span><div><div class="ddate">Wed, Mar 31 · Stanford Law</div><h3>Stanford day + Computer History Museum</h3></div></header>
+
+<ul class="plan"><li>FutureLaw Week sessions at Stanford.</li><li>Optional: Caltrain one stop to Mountain View for the Computer History Museum (open Wednesdays 10–5).</li></ul>
+<div class="events"><h4>Event options</h4><div class="event"><b>Computer History Museum</b> <span class="st st-confirmed">dates confirmed</span><div>Open Wed–Sun, 10 a.m.–5 p.m. · <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></div><div class="enote">Couldn&#39;t load the ticket price; type it in once you check.</div><a class="src" href="https://computerhistory.org/plan-your-visit/" target="_blank" rel="noopener">source</a></div></div>
+
+</article>
+<article class="day" id="day-2027-04-01" data-leg="sf" data-stop="sf">
+<header><span class="dnum" style="background:#1c5bd8">6</span><div><div class="ddate">Thu, Apr 1 · San Francisco (SoMa)</div><h3>SF: legal tech and AI</h3></div></header>
+
+<ul class="plan"><li>UC Law SF&#39;s LexLab and the Bay Area Legal Hackers group are the two legal-tech hubs in the city; check both for an event this week.</li><li>Evening: an AI builders meetup or hackathon demo night on Luma.</li></ul>
+<div class="events"><h4>Event options</h4><div class="event"><b>Bay Area Legal Hackers happy hour</b> <span class="st st-unconfirmed">dates unconfirmed</span><div>Monthly; no date posted for Apr 2027 yet.</div><div class="enote">Formerly SF Legal Hackers; focus is generative AI and law.</div><a class="src" href="https://www.meetup.com/sflegalhackers" target="_blank" rel="noopener">source</a></div><div class="event"><b>UC Law SF LexLab legal-tech events</b> <span class="st st-unconfirmed">dates unconfirmed</span><div>Check the events page closer to the date.</div><a class="src" href="https://lexlab.uclawsf.edu/events" target="_blank" rel="noopener">source</a></div></div>
+
+</article>
+<article class="day" id="day-2027-04-02" data-leg="stanford" data-stop="stanford">
+<header><span class="dnum" style="background:#c2255c">7</span><div><div class="ddate">Fri, Apr 2 · Stanford Law</div><h3>FutureLaw Week wraps up</h3></div></header>
+
+<ul class="plan"><li>Last FutureLaw Week day at Stanford.</li><li>If the closing day is light, skip it and walk the UC Berkeley campus instead.</li></ul>
+
+
+</article>
+<article class="day" id="day-2027-04-03" data-leg="home" data-stop="oak">
+<header><span class="dnum" style="background:#e8590c">8</span><div><div class="ddate">Sat, Apr 3 · Oakland Airport</div><h3>Robots in the morning, fly home</h3></div></header>
+<div class="getting"><div class="g-head"><span class="mode">BART</span> Downtown Berkeley → Oakland Airport</div>
+<div class="g-row"><span>⏱ ≈ 36 min</span><span><span class="price" data-lo="9.3" data-hi="10.5" data-cur="USD"><b class="usd">$9.30–10.50</b></span> <span class="unit">one way</span> <span class="tag t-est">est</span> <a class="src" href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Book an afternoon or evening flight so you can catch the robotics matches first. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://bart.gov/guide/airport/oak" target="_blank" rel="noopener">source</a></p></div><div class="getting"><div class="g-head"><span class="mode">Flight</span> Oakland OAK (or SFO) → Buffalo BUF</div>
+<div class="g-row"><span>⏱ ≈ 7–12 h with one connection</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-oakland-to-buffalo-niagara-falls" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">A red-eye also works if you want a full day. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.kayak.com/flight-routes/Oakland-OAK/Buffalo-BUF" target="_blank" rel="noopener">source</a></p></div>
+<ul class="plan"><li>Morning: FIRST Robotics East Bay matches at Berkeley High School (free, spectators welcome).</li><li>Afternoon: BART to OAK and fly home.</li></ul>
+<div class="events"><h4>Event options</h4><div class="event"><b>FIRST Robotics East Bay district event</b> <span class="st st-confirmed">dates confirmed</span><div>Apr 2–4, 2027 at Berkeley High School; spectators welcome Apr 3–4. · <span class="price" data-lo="0" data-hi="0" data-cur="USD"><b class="usd">$0</b></span> <span class="unit">admission</span>  <a class="src" href="https://cafirst.org/frc/east-bay/" target="_blank" rel="noopener">source</a></div><div class="enote">About 40 high-school teams competed here in 2026.</div><a class="src" href="https://cafirst.org/frc/east-bay/" target="_blank" rel="noopener">source</a></div></div>
+<details class="tips"><summary>Local tips</summary><ul><li>Buffalo–Oakland flights connect (often via Chicago Midway or Baltimore); Southwest route pages show one-way fares from about $130–146. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-buffalo-niagara-falls-to-oakland" target="_blank" rel="noopener">source</a></li><li>OAK → Downtown Berkeley by BART takes about 36 minutes; an older guide lists the fare at $9.30 including the airport connector. BART raised fares 6.2% on Jan 1, 2026. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">source</a></li></ul></details>
+</article></section>
+
+  <section class="panel" id="budget" aria-label="Budget calculator">
+    <h2>Budget calculator</h2>
+    <p class="hint">Per person, low (budget) to high (comfort). Turn items on or off for each traveler, change activity days, room sharing and exchange rates. Everything recalculates, including prices above.</p>
+    <div id="budget-ui"></div>
+  </section>
+
+  <section class="panel" id="before" aria-label="Before you go">
+    <h2>Before you go</h2>
+    <ul class="checklist"><li><label class="chk"><input type="checkbox" data-check="0"><span>Watch the CodeX FutureLaw Week page and register when 2027 tickets open (2026 early-bird pricing ended about a month before the event).</span></label>  <a class="src" href="https://conferences.law.stanford.edu/futurelaw/" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="1"><span>Book the Muir Woods parking reservation for Sun Mar 28 (Easter) as soon as it opens; pick an early slot.</span></label>  <a class="src" href="https://www.nps.gov/muwo/planyourvisit/reservations.htm" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="2"><span>Compare BUF → OAK and BUF → SFO fares; land Sat Mar 27, fly home Sat Apr 3 afternoon or later.</span></label> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-buffalo-niagara-falls-to-oakland" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="3"><span>1–2 weeks out, RSVP on Luma and Meetup for the AI, robotics and legal-tech nights; popular ones fill up.</span></label> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://luma.com/physical-ai-meetup" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="4"><span>Set up tap-to-pay in your phone wallet; it works on BART, Muni and Caltrain.</span></label>  <a class="src" href="https://www.mtc.ca.gov/node/4040619" target="_blank" rel="noopener">source</a></li><li><label class="chk"><input type="checkbox" data-check="5"><span>Download the Waymo app if you want a robotaxi ride.</span></label>  <a class="src" href="https://waymo.com/blog/2026/01/waymo-rides-at-sfo/" target="_blank" rel="noopener">source</a></li></ul>
+  </section>
+
+  <section class="panel" id="notes" aria-label="Notes">
+    <h2>Notes</h2>
+    <ul><li>Big AI conferences sit just outside this week: AI Council (Mar 23–24) and LangChain&#39;s Interrupt (Mar 24–25) in SF the week before, and RSAC 2027 (Apr 5–8, Moscone) right after. Shifting the trip a few days either way would add one. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.aicouncil.com/" target="_blank" rel="noopener">source</a></li><li>RSAC 2027 is Apr 5–8 at Moscone Center.  <a class="src" href="https://moscone.com/events/rsac-2027-conference" target="_blank" rel="noopener">source</a></li><li>HumanX 2027 moved to Las Vegas (March), and Salesforce TDX 2027 is Mar 10–11, so neither is this week. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.businesswire.com/news/home/20260408616038/en/" target="_blank" rel="noopener">source</a></li><li>Lodging is $0 and your cousin drives on redwoods day. The budget covers flights, transit, FutureLaw, the redwoods day and food.</li><li>Flights, food, gas and FutureLaw pricing are estimates (est). Everything else links to the page checked on 2026-11-24.</li></ul>
+  </section>
+
+  <section class="panel" id="sources" aria-label="Sources">
+    <h2>Sources</h2>
+    <p class="hint">Checked {{CHECKED}}.</p>
+    <ul class="sources"><li><a href="https://www.aicouncil.com/" target="_blank" rel="noopener">aicouncil.com</a> <span class="path">/</span></li><li><a href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">arf.berkeley.edu</a> <span class="path">/what-we-do/map-directions-arf/oakland-airport-arf-public-tr</span></li><li><a href="https://arf.berkeley.edu/what-we-do/map-directions-arf/sfo-airport-arf-public-transport" target="_blank" rel="noopener">arf.berkeley.edu</a> <span class="path">/what-we-do/map-directions-arf/sfo-airport-arf-public-transp</span></li><li><a href="https://bart.gov/guide/airport/oak" target="_blank" rel="noopener">bart.gov</a> <span class="path">/guide/airport/oak</span></li><li><a href="https://www.businesswire.com/news/home/20260408616038/en/" target="_blank" rel="noopener">businesswire.com</a> <span class="path">/news/home/20260408616038/en/</span></li><li><a href="https://cafirst.org/frc/east-bay/" target="_blank" rel="noopener">cafirst.org</a> <span class="path">/frc/east-bay/</span></li><li><a href="https://www.caltrain.com/Fares" target="_blank" rel="noopener">caltrain.com</a> <span class="path">/Fares</span></li><li><a href="https://www.caltrain.com/media/36271" target="_blank" rel="noopener">caltrain.com</a> <span class="path">/media/36271</span></li><li><a href="https://computerhistory.org/plan-your-visit/" target="_blank" rel="noopener">computerhistory.org</a> <span class="path">/plan-your-visit/</span></li><li><a href="https://conferences.law.stanford.edu/futurelaw/" target="_blank" rel="noopener">conferences.law.stanford.edu</a> <span class="path">/futurelaw/</span></li><li><a href="https://conferences.law.stanford.edu/futurelaw2026/rates-and-registration/" target="_blank" rel="noopener">conferences.law.stanford.edu</a> <span class="path">/futurelaw2026/rates-and-registration/</span></li><li><a href="https://www.goldengate.org/golden-gate-bridge-toll-rates-increase-july-1-2026/" target="_blank" rel="noopener">goldengate.org</a> <span class="path">/golden-gate-bridge-toll-rates-increase-july-1-2026/</span></li><li><a href="https://www.kayak.com/flight-routes/Buffalo-BUF/San-Francisco-SFO" target="_blank" rel="noopener">kayak.com</a> <span class="path">/flight-routes/Buffalo-BUF/San-Francisco-SFO</span></li><li><a href="https://www.kayak.com/flight-routes/Oakland-OAK/Buffalo-BUF" target="_blank" rel="noopener">kayak.com</a> <span class="path">/flight-routes/Oakland-OAK/Buffalo-BUF</span></li><li><a href="https://lexlab.uclawsf.edu/events" target="_blank" rel="noopener">lexlab.uclawsf.edu</a> <span class="path">/events</span></li><li><a href="https://luma.com/physical-ai-meetup" target="_blank" rel="noopener">luma.com</a> <span class="path">/physical-ai-meetup</span></li><li><a href="https://luma.com/84lattht" target="_blank" rel="noopener">luma.com</a> <span class="path">/84lattht</span></li><li><a href="https://www.meetup.com/sflegalhackers" target="_blank" rel="noopener">meetup.com</a> <span class="path">/sflegalhackers</span></li><li><a href="https://moscone.com/events/rsac-2027-conference" target="_blank" rel="noopener">moscone.com</a> <span class="path">/events/rsac-2027-conference</span></li><li><a href="https://www.mtc.ca.gov/node/4040619" target="_blank" rel="noopener">mtc.ca.gov</a> <span class="path">/node/4040619</span></li><li><a href="https://mtc.ca.gov/about-mtc/authorities/bay-area-toll-authority/2026-toll-increase-high-occupancy-vehicle-hov-policy-updates" target="_blank" rel="noopener">mtc.ca.gov</a> <span class="path">/about-mtc/authorities/bay-area-toll-authority/2026-toll-inc</span></li><li><a href="https://www.nps.gov/muwo/planyourvisit/fees.htm" target="_blank" rel="noopener">nps.gov</a> <span class="path">/muwo/planyourvisit/fees.htm</span></li><li><a href="https://www.nps.gov/goga/planyourvisit/muir-woods-main-trail.htm" target="_blank" rel="noopener">nps.gov</a> <span class="path">/goga/planyourvisit/muir-woods-main-trail.htm</span></li><li><a href="https://www.nps.gov/muwo/planyourvisit/hours.htm" target="_blank" rel="noopener">nps.gov</a> <span class="path">/muwo/planyourvisit/hours.htm</span></li><li><a href="https://www.nps.gov/muwo/planyourvisit/reservations.htm" target="_blank" rel="noopener">nps.gov</a> <span class="path">/muwo/planyourvisit/reservations.htm</span></li><li><a href="https://www.sfmta.com/ar/node/46055" target="_blank" rel="noopener">sfmta.com</a> <span class="path">/ar/node/46055</span></li><li><a href="https://www.southwest.com/en/flights/flights-from-buffalo-niagara-falls-to-oakland" target="_blank" rel="noopener">southwest.com</a> <span class="path">/en/flights/flights-from-buffalo-niagara-falls-to-oakland</span></li><li><a href="https://www.southwest.com/en/flights/flights-from-oakland-to-buffalo-niagara-falls" target="_blank" rel="noopener">southwest.com</a> <span class="path">/en/flights/flights-from-oakland-to-buffalo-niagara-falls</span></li><li><a href="https://thepointsguy.com/news/jetblue-raises-baggage-fees-again/" target="_blank" rel="noopener">thepointsguy.com</a> <span class="path">/news/jetblue-raises-baggage-fees-again/</span></li><li><a href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">uber.com</a> <span class="path">/global/en/r/routes/berkeley-ca-to-san-francisco-ca</span></li><li><a href="https://waymo.com/blog/2026/01/waymo-rides-at-sfo/" target="_blank" rel="noopener">waymo.com</a> <span class="path">/blog/2026/01/waymo-rides-at-sfo/</span></li></ul>
+  </section>
+</main>
+
+<div id="sheet" role="dialog" aria-modal="false" aria-labelledby="sheet-title" hidden>
+  <button type="button" class="close" id="sheet-close" aria-label="Close">×</button>
+  <div id="sheet-body"></div>
+</div>
+
+<div hidden><template id="card-oak"><h2>Oakland Airport</h2><p class="cdates">Mar 27 (arrive), Apr 3 (depart)</p>
+<p>Closest airport to Berkeley. Southwest flies Buffalo → Oakland with one connection. The BART connector runs right to the terminal.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">Flight</span> Buffalo BUF → Oakland OAK (or SFO)</div>
+<div class="g-row"><span>⏱ ≈ 7–12 h with one connection</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.kayak.com/flight-routes/Buffalo-BUF/San-Francisco-SFO" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">No nonstops from Buffalo. Compare OAK and SFO on the same dates; OAK saves about 20 minutes and a transfer on the ride to Berkeley. Southwest has no change fees. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-buffalo-niagara-falls-to-oakland" target="_blank" rel="noopener">source</a></p></div><div class="getting"><div class="g-head"><span class="mode">BART</span> Downtown Berkeley → Oakland Airport</div>
+<div class="g-row"><span>⏱ ≈ 36 min</span><span><span class="price" data-lo="9.3" data-hi="10.5" data-cur="USD"><b class="usd">$9.30–10.50</b></span> <span class="unit">one way</span> <span class="tag t-est">est</span> <a class="src" href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Book an afternoon or evening flight so you can catch the robotics matches first. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://bart.gov/guide/airport/oak" target="_blank" rel="noopener">source</a></p></div><div class="getting"><div class="g-head"><span class="mode">Flight</span> Oakland OAK (or SFO) → Buffalo BUF</div>
+<div class="g-row"><span>⏱ ≈ 7–12 h with one connection</span><span><span class="price" data-lo="125" data-hi="250" data-cur="USD"><b class="usd">$125–250</b></span> <span class="unit">one way, economy</span> <span class="tag t-est">est</span> <a class="src" href="https://www.southwest.com/en/flights/flights-from-oakland-to-buffalo-niagara-falls" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">A red-eye also works if you want a full day. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.kayak.com/flight-routes/Oakland-OAK/Buffalo-BUF" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>BART airport ↔ Berkeley (2 trips): <span class="price" data-lo="9.3" data-hi="11.5" data-cur="USD"><b class="usd">$9.30–11.50</b></span> <span class="tag t-est">est</span> <a class="src" href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">source</a></li></ul>
+<p><a class="btn-link" href="#day-2027-04-03" data-close>See the days here ↓</a></p></template>
+<template id="card-sfo"><h2>SFO</h2><p class="cdates">Alternative airport</p>
+<p>More flights and often cheaper fares than Oakland, but about 55 minutes to Berkeley by BART with a transfer.</p>
+
+
+</template>
+<template id="card-berkeley"><h2>Berkeley</h2><p class="cdates">Mar 27 – Apr 3 · 7 nights</p>
+<p>Home base with your cousin all week. Downtown Berkeley BART gets you to SF in about 26 minutes.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">BART</span> Oakland Airport → Downtown Berkeley</div>
+<div class="g-row"><span>⏱ ≈ 36 min</span><span><span class="price" data-lo="9.3" data-hi="10.5" data-cur="USD"><b class="usd">$9.30–10.50</b></span> <span class="unit">one way, includes airport connector</span> <span class="tag t-est">est</span> <a class="src" href="https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Tap your bank card or phone at the gate. Change at Coliseum from the airport connector to a Richmond-bound train. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://bart.gov/guide/airport/oak" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>Staying with your cousin: <span class="price" data-lo="0" data-hi="0" data-cur="USD"><b class="usd">$0</b></span> <span class="tag t-est">est</span> </li></ul>
+<p><a class="btn-link" href="#day-2027-03-27" data-close>See the days here ↓</a></p></template>
+<template id="card-sf"><h2>San Francisco (SoMa)</h2><p class="cdates">Mar 30, Apr 1</p>
+<p>Where most AI and robotics meetups happen: SoMa, Moscone area, Frontier Tower and startup offices. UC Law SF&#39;s LexLab is nearby for legal tech.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">BART</span> Downtown Berkeley → Powell St / Montgomery</div>
+<div class="g-row"><span>⏱ ≈ 26 min</span><span><span class="price" data-lo="3" data-hi="4" data-cur="USD"><b class="usd">$3–4</b></span> <span class="unit">one way</span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Uber is about $40 each way on average; use it for late-night returns. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>BART Berkeley ↔ SF, per day (round trip): <span class="price" data-lo="6" data-hi="8" data-cur="USD"><b class="usd">$6–8</b></span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></li><li>Muni in SF, per day (2 rides): <span class="price" data-lo="6" data-hi="6" data-cur="USD"><b class="usd">$6</b></span>  <a class="src" href="https://www.sfmta.com/ar/node/46055" target="_blank" rel="noopener">source</a></li><li>Uber Berkeley ↔ SF for late nights (per ride): <span class="price" data-lo="40" data-hi="40" data-cur="USD"><b class="usd">$40</b></span> <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca" target="_blank" rel="noopener">source</a></li><li>AI / robotics / legal-tech meetups: <span class="price" data-lo="0" data-hi="50" data-cur="USD"><b class="usd">$0–50</b></span> <span class="tag t-est">est</span> </li><li>Waymo robotaxi ride in SF: <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></li></ul>
+<p><a class="btn-link" href="#day-2027-03-30" data-close>See the days here ↓</a></p></template>
+<template id="card-stanford"><h2>Stanford Law</h2><p class="cdates">Mar 29 – Apr 2</p>
+<p>CodeX FutureLaw Week 2027 at Paul Brest Hall: Stanford&#39;s legal-tech and AI-and-law conference, run this year as a full week.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">BART + Caltrain</span> Downtown Berkeley → Palo Alto</div>
+<div class="g-row"><span>⏱ ≈ 1 h 45 min – 2 h door to door</span><span><span class="price" data-lo="6.25" data-hi="6.25" data-cur="USD"><b class="usd">$6.25</b></span> <span class="unit">Caltrain leg, one way (BART leg extra)</span>  <a class="src" href="https://www.caltrain.com/Fares" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">BART to Millbrae, cross-platform to Caltrain, ride to Palo Alto, then the free Marguerite shuttle or a 20-minute walk to the Law School. Check Caltrain express times; local trains are slower. <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.caltrain.com/media/36271" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>Caltrain Millbrae ↔ Palo Alto, per Stanford day: <span class="price" data-lo="12.5" data-hi="12.5" data-cur="USD"><b class="usd">$12.50</b></span>  <a class="src" href="https://www.caltrain.com/Fares" target="_blank" rel="noopener">source</a></li><li>BART Berkeley ↔ Millbrae, per Stanford day: <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></li><li>CodeX FutureLaw Week registration: <span class="price" data-lo="370" data-hi="470" data-cur="USD"><b class="usd">$370–470</b></span> <span class="tag t-est">est</span> <a class="src" href="https://conferences.law.stanford.edu/futurelaw2026/rates-and-registration/" target="_blank" rel="noopener">source</a></li></ul>
+<p><a class="btn-link" href="#day-2027-03-29" data-close>See the days here ↓</a></p></template>
+<template id="card-chm"><h2>Computer History Museum</h2><p class="cdates">Mar 31 (option)</p>
+<p>Mountain View, one Caltrain stop past Palo Alto. Open Wed–Sun 10–5, so it pairs with a Wednesday at Stanford.</p>
+
+<h4>Costs here</h4><ul class="costs"><li>Computer History Museum admission: <span class="price ph">price not found — add it in the budget</span> <span class="tag t-unverified">unverified</span></li></ul>
+</template>
+<template id="card-muir"><h2>Muir Woods</h2><p class="cdates">Sun Mar 28</p>
+<p>Old-growth coast redwoods in Marin, about an hour&#39;s drive from Berkeley. Parking must be reserved ahead.</p>
+<h4>Getting there</h4><div class="getting"><div class="g-head"><span class="mode">Car</span> Berkeley → Muir Woods</div>
+<div class="g-row"><span>⏱ ≈ 1 h each way</span><span><span class="price" data-lo="8.5" data-hi="9" data-cur="USD"><b class="usd">$8.50–9</b></span> <span class="unit">Richmond–San Rafael Bridge toll, westbound only</span> <span class="tag t-est">est</span> <a class="src" href="https://mtc.ca.gov/about-mtc/authorities/bay-area-toll-authority/2026-toll-increase-high-occupancy-vehicle-hov-policy-updates" target="_blank" rel="noopener">source</a></span></div>
+<p class="g-notes">Go out via I-580 and the Richmond–San Rafael Bridge, then US-101 and Hwy 1. Coming back the same way is toll-free. Coming back through SF instead costs a Golden Gate Bridge toll ($10.25 FasTrak). <span class="tag t-secondary">secondary source</span> <a class="src" href="https://www.goldengate.org/golden-gate-bridge-toll-rates-increase-july-1-2026/" target="_blank" rel="noopener">source</a></p></div>
+<h4>Costs here</h4><ul class="costs"><li>Richmond–San Rafael Bridge toll (cover your cousin): <span class="price" data-lo="8.5" data-hi="9" data-cur="USD"><b class="usd">$8.50–9</b></span> <span class="tag t-est">est</span> <a class="src" href="https://mtc.ca.gov/about-mtc/authorities/bay-area-toll-authority/2026-toll-increase-high-occupancy-vehicle-hov-policy-updates" target="_blank" rel="noopener">source</a></li><li>Gas money for the redwoods drive: <span class="price" data-lo="15" data-hi="30" data-cur="USD"><b class="usd">$15–30</b></span> <span class="tag t-est">est</span> </li><li>Muir Woods entrance (ages 16+): <span class="price" data-lo="15" data-hi="15" data-cur="USD"><b class="usd">$15</b></span>  <a class="src" href="https://www.nps.gov/muwo/planyourvisit/fees.htm" target="_blank" rel="noopener">source</a></li><li>Muir Woods parking reservation (per car): <span class="price" data-lo="9.5" data-hi="10" data-cur="USD"><b class="usd">$9.50–10</b></span>  <a class="src" href="https://www.nps.gov/muwo/planyourvisit/reservations.htm" target="_blank" rel="noopener">source</a></li></ul>
+<p><a class="btn-link" href="#day-2027-03-28" data-close>See the days here ↓</a></p></template></div>
+<script type="application/json" id="trip-data">{"slug":"sf-bay-tech-2027","version":"2026-11-25T00:50:25.873Z","checked":"2026-11-24","rates":{},"rateInfo":{},"travelers":[{"id":"h","name":"Henry"}],"legs":[{"id":"arrive","name":"Arrive + redwoods","color":"#2b8a3e","stops":["oak","sfo","berkeley","muir"]},{"id":"stanford","name":"Stanford FutureLaw","color":"#c2255c","stops":["berkeley","stanford","chm"]},{"id":"sf","name":"SF tech & AI","color":"#1c5bd8","stops":["berkeley","sf"]},{"id":"home","name":"Robotics + home","color":"#e8590c","stops":["oak","berkeley"]}],"stops":[{"id":"oak","name":"Oakland Airport","major":false,"x":608.1,"y":372.7},{"id":"sfo","name":"SFO","major":false,"x":444.1,"y":491.4},{"id":"berkeley","name":"Berkeley","major":true,"x":553.2,"y":165.7},{"id":"sf","name":"San Francisco (SoMa)","major":true,"x":421.5,"y":279.7},{"id":"stanford","name":"Stanford Law","major":true,"x":661.3,"y":747.3},{"id":"chm","name":"Computer History Museum","major":false,"x":754.4,"y":760},{"id":"muir","name":"Muir Woods","major":true,"x":245.6,"y":140}],"map":{"home":{"x":0,"y":0,"w":1000,"h":900},"limit":{"x":-600,"y":-540,"w":2200,"h":1980.0000000000002}},"budget":{"roomSize":1,"sharing":false,"cats":[{"id":"flights","label":"Flights"},{"id":"transport","label":"Transport"},{"id":"activities","label":"Events & activities"},{"id":"lodging","label":"Lodging"},{"id":"food","label":"Food"}],"items":[{"id":"fly","cat":"flights","label":"BUF ↔ OAK or SFO, round trip (economy, 1 stop)","lo":250,"hi":450,"cur":"USD","per":"person","tag":"est","src":"https://www.kayak.com/flight-routes/Buffalo-BUF/San-Francisco-SFO","basis":"KAYAK: cheapest recent round trip $200, April average about $388. Airline pages show one-way fares from $130–160."},{"id":"bag","cat":"flights","label":"Checked bag, each way (untick if carry-on only)","lo":45,"hi":45,"cur":"USD","per":"person","qty":2,"who":[],"tag":"secondary","src":"https://thepointsguy.com/news/jetblue-raises-baggage-fees-again/","note":"Southwest's first checked bag is $45 since Apr 2026; other airlines vary."},{"id":"bartair","cat":"transport","label":"BART airport ↔ Berkeley (2 trips)","lo":9.3,"hi":11.5,"cur":"USD","per":"person","qty":2,"stop":"oak","tag":"est","src":"https://arf.berkeley.edu/what-we-do/map-directions-arf/oakland-airport-arf-public-transport","basis":"Older guide: $9.30 from OAK, $10.30 from SFO; 2026 fares are about 6% higher."},{"id":"bartsf","cat":"transport","label":"BART Berkeley ↔ SF, per day (round trip)","lo":6,"hi":8,"cur":"USD","per":"person","perDay":true,"days":2,"stop":"sf","tag":"secondary","src":"https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca","note":"$3–4 each way per Uber's route page."},{"id":"muni","cat":"transport","label":"Muni in SF, per day (2 rides)","lo":6,"cur":"USD","per":"person","perDay":true,"days":2,"stop":"sf","tag":"official","src":"https://www.sfmta.com/ar/node/46055"},{"id":"caltrain","cat":"transport","label":"Caltrain Millbrae ↔ Palo Alto, per Stanford day","lo":12.5,"cur":"USD","per":"person","perDay":true,"days":3,"stop":"stanford","tag":"official","src":"https://www.caltrain.com/Fares","note":"$6.25 each way, 2 zones."},{"id":"bartmillbrae","cat":"transport","label":"BART Berkeley ↔ Millbrae, per Stanford day","lo":null,"cur":"USD","per":"person","perDay":true,"days":3,"stop":"stanford","tag":"unverified","note":"Couldn't confirm the 2026 fare. Check bart.gov's fare calculator and type in the round-trip amount."},{"id":"uber","cat":"transport","label":"Uber Berkeley ↔ SF for late nights (per ride)","lo":40,"cur":"USD","per":"person","qty":2,"who":[],"stop":"sf","tag":"secondary","src":"https://www.uber.com/global/en/r/routes/berkeley-ca-to-san-francisco-ca","note":"Uber's 12-month average for this route; surge pricing can push it higher."},{"id":"toll","cat":"transport","label":"Richmond–San Rafael Bridge toll (cover your cousin)","lo":8.5,"hi":9,"cur":"USD","per":"person","stop":"muir","tag":"est","src":"https://mtc.ca.gov/about-mtc/authorities/bay-area-toll-authority/2026-toll-increase-high-occupancy-vehicle-hov-policy-updates","basis":"$8.50 in 2026, +$0.50 each Jan 1."},{"id":"gas","cat":"transport","label":"Gas money for the redwoods drive","lo":15,"hi":30,"cur":"USD","per":"person","stop":"muir","tag":"est","basis":"About 70 miles round trip at 20–30 mpg and roughly $5–6/gal California gas, rounded up."},{"id":"futurelaw","cat":"activities","label":"CodeX FutureLaw Week registration","lo":370,"hi":470,"cur":"USD","per":"person","stop":"stanford","tag":"est","src":"https://conferences.law.stanford.edu/futurelaw2026/rates-and-registration/","basis":"2026 rates: $370 early bird, $470 regular. 2027 not posted yet; student or affiliate rates may be lower."},{"id":"muirentry","cat":"activities","label":"Muir Woods entrance (ages 16+)","lo":15,"cur":"USD","per":"person","qty":2,"stop":"muir","tag":"official","src":"https://www.nps.gov/muwo/planyourvisit/fees.htm","note":"×2 covers you and your cousin."},{"id":"muirpark","cat":"activities","label":"Muir Woods parking reservation (per car)","lo":9.5,"hi":10,"cur":"USD","per":"person","stop":"muir","tag":"official","src":"https://www.nps.gov/muwo/planyourvisit/reservations.htm","note":"Sources show $9.50–10 for a standard car; check gomuirwoods.com when booking."},{"id":"meetups","cat":"activities","label":"AI / robotics / legal-tech meetups","lo":0,"hi":50,"cur":"USD","per":"person","stop":"sf","tag":"est","basis":"Most Luma and Meetup community events are free with RSVP; a few charge a small fee."},{"id":"chm","cat":"activities","label":"Computer History Museum admission","lo":null,"cur":"USD","per":"person","who":[],"stop":"chm","tag":"unverified","note":"Price not found; type it in if you go."},{"id":"waymo","cat":"activities","label":"Waymo robotaxi ride in SF","lo":null,"cur":"USD","per":"person","who":[],"stop":"sf","tag":"unverified","note":"Fare varies by trip; check the Waymo app."},{"id":"lodging","cat":"lodging","label":"Staying with your cousin","lo":0,"cur":"USD","per":"person","stop":"berkeley","tag":"est","basis":"Free; all seven nights at your cousin's."},{"id":"hostgift","cat":"lodging","label":"Thank-you for your cousin (dinner out or gift)","lo":50,"hi":150,"cur":"USD","per":"person","tag":"est","basis":"One dinner out or a small gift."},{"id":"food","cat":"food","label":"Food & drinks","lo":30,"hi":75,"cur":"USD","per":"person","perDay":true,"days":8,"tag":"est","basis":"Breakfast at your cousin's, lunch and dinner out at casual Bay Area spots; conference days may include some food."}]}}</script>
+<script>(function () {
+  'use strict';
+  var D = JSON.parse(document.getElementById('trip-data').textContent);
+  var KEY = 'trip-map:' + D.slug;
+  var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  // ---------- state (saved per device; reset when the page is republished) ----------
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
+  if (saved.version !== D.version) saved = { checks: saved.checks };
+  var items = D.budget.items;
+  var S = { rates: {}, sharing: D.budget.sharing !== false, days: {}, on: {}, ph: {}, checks: saved.checks || {} };
+  Object.keys(D.rates).forEach(function (c) { S.rates[c] = D.rates[c]; });
+  D.travelers.forEach(function (t) {
+    S.on[t.id] = {};
+    items.forEach(function (it) { S.on[t.id][it.id] = !it.who || it.who.indexOf(t.id) >= 0; });
+  });
+  items.forEach(function (it) {
+    if (it.perDay) S.days[it.id] = it.days || 1;
+    if (it.lo == null) S.ph[it.id] = { lo: null, hi: null };
+  });
+  ['rates', 'days', 'ph'].forEach(function (k) { if (saved[k]) Object.keys(saved[k]).forEach(function (x) { if (x in S[k]) S[k][x] = saved[k][x]; }); });
+  if (typeof saved.sharing === 'boolean') S.sharing = saved.sharing;
+  if (saved.on) Object.keys(saved.on).forEach(function (t) { if (S.on[t]) Object.keys(saved.on[t]).forEach(function (i) { if (i in S.on[t]) S.on[t][i] = !!saved.on[t][i]; }); });
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ version: D.version, rates: S.rates, sharing: S.sharing, days: S.days, on: S.on, ph: S.ph, checks: S.checks })); } catch (e) {} }
+
+  // ---------- money ----------
+  var SYM = { USD: '$', JPY: '¥', KRW: '₩', EUR: '€', GBP: '£', TWD: 'NT$', THB: '฿', CNY: 'CN¥', HKD: 'HK$', CAD: 'C$', AUD: 'A$', MXN: 'MX$', CHF: 'CHF ' };
+  function fmt(v, cur) {
+    if (v == null || !isFinite(v)) return '?';
+    var dec = cur === 'USD' && Math.abs(v) < 20 && Math.round(v) !== v ? 2 : 0;
+    return (SYM[cur] != null ? SYM[cur] : cur + ' ') + v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+  function fmtRange(lo, hi, cur) {
+    if (hi == null || Math.abs(hi - lo) < 1e-9) return fmt(lo, cur);
+    return fmt(lo, cur) + '–' + fmt(hi, cur).replace(/^[^\d-]+/, '');
+  }
+  function toUSD(v, cur) { return cur === 'USD' ? v : v / S.rates[cur]; }
+  function renderPrices(root) {
+    $$('.price[data-cur]', root).forEach(function (el) {
+      var lo = +el.getAttribute('data-lo'), hi = +el.getAttribute('data-hi'), cur = el.getAttribute('data-cur');
+      el.querySelector('.usd').textContent = fmtRange(toUSD(lo, cur), toUSD(hi, cur), 'USD');
+    });
+  }
+
+  // ---------- budget ----------
+  function amounts(it) { return it.lo == null ? S.ph[it.id] : { lo: it.lo, hi: it.hi != null ? it.hi : it.lo }; }
+  function units(it) { return it.perDay ? (+S.days[it.id] || 0) : (it.qty || 1); }
+  function share(it) {
+    if (it.per === 'room') return S.sharing ? 1 / (D.budget.roomSize || 2) : 1;
+    if (it.per === 'group') {
+      var n = D.travelers.filter(function (t) { return S.on[t.id][it.id]; }).length;
+      return n ? 1 / n : 0;
+    }
+    return 1;
+  }
+  function calc() {
+    var res = {};
+    D.travelers.forEach(function (t) {
+      var r = { lo: 0, hi: 0, cats: {} };
+      D.budget.cats.forEach(function (c) { r.cats[c.id] = { lo: 0, hi: 0 }; });
+      items.forEach(function (it) {
+        if (!S.on[t.id][it.id]) return;
+        var a = amounts(it); if (!a || a.lo == null) return;
+        var f = units(it) * share(it);
+        var lo = toUSD(+a.lo, it.cur) * f, hi = toUSD(+(a.hi != null ? a.hi : a.lo), it.cur) * f;
+        r.cats[it.cat].lo += lo; r.cats[it.cat].hi += hi; r.lo += lo; r.hi += hi;
+      });
+      res[t.id] = r;
+    });
+    return res;
+  }
+  var r2 = function (v) { return Math.round(v * 100) / 100; };
+  var usd0 = function (v) { return '$' + Math.round(v).toLocaleString('en-US'); };
+
+  var ui = $('#budget-ui');
+  function buildBudget() {
+    var h = '<div class="totals" id="totals"></div><div class="ctrls">';
+    h += '<label class="tgl"><input type="checkbox" id="sharing"' + (S.sharing ? ' checked' : '') + '> Share rooms (' + (D.budget.roomSize || 2) + ' per room)</label>';
+    Object.keys(S.rates).forEach(function (c) {
+      var info = (D.rateInfo || {})[c] || {};
+      h += '<div class="rate"><span>' + (SYM[c] || c) + ' per $1 <small class="hint">' + (info.src ? '<a href="' + info.src + '" target="_blank" rel="noopener">rate source</a>' : '') + (info.asOf ? ' · ' + info.asOf : '') + '</small></span><input type="number" inputmode="decimal" step="any" min="0" data-rate="' + c + '" value="' + S.rates[c] + '" aria-label="' + c + ' per US dollar"></div>';
+    });
+    h += '</div>';
+    D.budget.cats.forEach(function (cat) {
+      var list = items.filter(function (it) { return it.cat === cat.id; });
+      if (!list.length) return;
+      h += '<div class="cat">' + cat.label + '</div>';
+      list.forEach(function (it) {
+        h += '<div class="item" data-item="' + it.id + '"><div class="lbl">' + esc(it.label) + '</div><div class="row">';
+        if (it.lo == null) {
+          h += '<span class="price ph">not found:</span> <input type="number" inputmode="decimal" step="any" placeholder="low" data-ph="' + it.id + '" data-k="lo" value="' + (S.ph[it.id].lo != null ? S.ph[it.id].lo : '') + '" aria-label="' + esc(it.label) + ' low price in ' + it.cur + '"> <input type="number" inputmode="decimal" step="any" placeholder="high" data-ph="' + it.id + '" data-k="hi" value="' + (S.ph[it.id].hi != null ? S.ph[it.id].hi : '') + '" aria-label="' + esc(it.label) + ' high price in ' + it.cur + '"> ' + it.cur;
+        } else {
+          var hi = it.hi != null ? it.hi : it.lo;
+          h += '<span class="price" data-lo="' + it.lo + '" data-hi="' + hi + '" data-cur="' + it.cur + '"><b class="usd"></b>' + (it.cur !== 'USD' ? ' <span class="loc">' + fmtRange(it.lo, hi, it.cur) + '</span>' : '') + '</span>';
+        }
+        h += ' <span class="unit">' + ({ person: 'per person', room: 'per room', group: 'split' }[it.per]) + (it.perDay ? ' per day' : it.qty > 1 ? ' × ' + it.qty : '') + '</span>';
+        if (it.tag && it.tag !== 'official') h += ' <span class="tag t-' + it.tag + '">' + ({ secondary: 'secondary source', est: 'est', unverified: 'unverified' }[it.tag]) + '</span>';
+        if (it.src) h += ' <a class="src" href="' + esc(it.src) + '" target="_blank" rel="noopener">source</a>';
+        h += '</div>';
+        if (it.perDay) h += '<div class="row"><label class="tgl">Days <input type="number" inputmode="numeric" min="0" step="1" data-days="' + it.id + '" value="' + S.days[it.id] + '" aria-label="' + esc(it.label) + ' days"></label></div>';
+        h += '<div class="row">';
+        D.travelers.forEach(function (t) {
+          h += '<label class="tgl"><input type="checkbox" data-on="' + t.id + '|' + it.id + '"' + (S.on[t.id][it.id] ? ' checked' : '') + '> ' + esc(t.name) + '</label>';
+        });
+        h += '</div>' + (it.note ? '<div class="note">' + esc(it.note) + '</div>' : '') + '</div>';
+      });
+    });
+    ui.innerHTML = h;
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function renderTotals() {
+    var res = calc(), h = '', gLo = 0, gHi = 0;
+    D.travelers.forEach(function (t) {
+      var r = res[t.id]; gLo += r.lo; gHi += r.hi;
+      h += '<div class="tot" data-trav-total="' + t.id + '" data-lo="' + r2(r.lo) + '" data-hi="' + r2(r.hi) + '"><div class="who">' + esc(t.name) + '</div><div class="big">' + usd0(r.lo) + '–' + usd0(r.hi).slice(1) + '</div><table>';
+      D.budget.cats.forEach(function (c) {
+        var x = r.cats[c.id];
+        h += '<tr data-cat="' + c.id + '" data-lo="' + r2(x.lo) + '" data-hi="' + r2(x.hi) + '"><td>' + c.label + '</td><td>' + usd0(x.lo) + '–' + usd0(x.hi).slice(1) + '</td></tr>';
+      });
+      h += '</table></div>';
+    });
+    if (D.travelers.length > 1) h += '<div class="tot" data-group-total data-lo="' + r2(gLo) + '" data-hi="' + r2(gHi) + '"><div class="who">Everyone</div><div class="big">' + usd0(gLo) + '–' + usd0(gHi).slice(1) + '</div></div>';
+    $('#totals').innerHTML = h;
+  }
+  function recalc() { renderPrices(document); renderTotals(); save(); }
+  buildBudget();
+  ui.addEventListener('input', function (e) {
+    var el = e.target, v;
+    if (el.hasAttribute('data-rate')) { v = parseFloat(el.value); if (v > 0) S.rates[el.getAttribute('data-rate')] = v; }
+    else if (el.hasAttribute('data-days')) { v = parseInt(el.value, 10); S.days[el.getAttribute('data-days')] = v >= 0 ? v : 0; }
+    else if (el.hasAttribute('data-ph')) { v = parseFloat(el.value); S.ph[el.getAttribute('data-ph')][el.getAttribute('data-k')] = isFinite(v) ? v : null; }
+    else return;
+    recalc();
+  });
+  ui.addEventListener('change', function (e) {
+    var el = e.target;
+    if (el.id === 'sharing') S.sharing = el.checked;
+    else if (el.hasAttribute('data-on')) { var p = el.getAttribute('data-on').split('|'); S.on[p[0]][p[1]] = el.checked; }
+    else return;
+    recalc();
+  });
+  $$('[data-check]').forEach(function (cb) {
+    cb.checked = !!S.checks[cb.getAttribute('data-check')];
+    cb.addEventListener('change', function () { S.checks[cb.getAttribute('data-check')] = cb.checked; save(); });
+  });
+  recalc();
+
+  // ---------- map ----------
+  var svg = $('#map');
+  var stops = D.stops, byId = {};
+  stops.forEach(function (s) { byId[s.id] = s; });
+  var HOME = D.map.home, LIM = D.map.limit;
+  var vb = { x: HOME.x, y: HOME.y, w: HOME.w, h: HOME.h }, anim = null, activeLeg = 'all';
+  var markerEls = {}, labelEls = {};
+  $$('.stop', svg).forEach(function (g) { markerEls[g.getAttribute('data-stop')] = g; });
+  $$('.labels text', svg).forEach(function (t) { labelEls[t.getAttribute('data-stop')] = t; });
+
+  function rect() { return svg.getBoundingClientRect(); }
+  function aspect() { var r = rect(); return r.width > 0 && r.height > 0 ? r.width / r.height : 1.5; }
+  function fit(b) {
+    var a = aspect(), x = b.x, y = b.y, w = b.w, h = b.h;
+    if (w / h > a) { var nh = w / a; y -= (nh - h) / 2; h = nh; } else { var nw = h * a; x -= (nw - w) / 2; w = nw; }
+    return { x: x, y: y, w: w, h: h };
+  }
+  function clamp(v) {
+    var a = aspect(), minW = HOME.w / 30, maxW = Math.min(LIM.w, LIM.h * a);
+    var w = Math.max(minW, Math.min(maxW, v.w)), h = w / a;
+    var cx = v.x + v.w / 2, cy = v.y + v.h / 2;
+    cx = Math.max(LIM.x + w / 2, Math.min(LIM.x + LIM.w - w / 2, cx));
+    cy = Math.max(LIM.y + h / 2, Math.min(LIM.y + LIM.h - h / 2, cy));
+    return { x: cx - w / 2, y: cy - h / 2, w: w, h: h };
+  }
+  function scale() { var r = rect(); return r.width ? vb.w / r.width : 1; }
+  function setVB(v) {
+    vb = clamp(v);
+    svg.setAttribute('viewBox', vb.x.toFixed(2) + ' ' + vb.y.toFixed(2) + ' ' + vb.w.toFixed(2) + ' ' + vb.h.toFixed(2));
+    var s = scale();
+    svg.style.setProperty('--s', s.toFixed(4));
+    stops.forEach(function (st) { markerEls[st.id].firstChild.setAttribute('r', (7 * s).toFixed(2)); });
+    layoutLabels(s);
+  }
+  function screenPos(id) {
+    var st = byId[id], r = rect();
+    return { x: r.left + (st.x - vb.x) / vb.w * r.width, y: r.top + (st.y - vb.y) / vb.h * r.height };
+  }
+  function layoutLabels(s) {
+    var r = rect(), placed = [], fs = 12.5;
+    var order = stops.slice().sort(function (a, b) { return (b.major ? 1 : 0) - (a.major ? 1 : 0); });
+    var dimmed = function (id) { return markerEls[id].classList.contains('dim'); };
+    order.sort(function (a, b) { return (dimmed(a.id) ? 1 : 0) - (dimmed(b.id) ? 1 : 0); });
+    // markers themselves are obstacles too
+    var obstacles = stops.map(function (st) { var p = screenPos(st.id); return { x: p.x - 7, y: p.y - 7, w: 14, h: 14, id: st.id }; });
+    var zc = document.querySelector('.zoom');
+    if (zc) { var zr = zc.getBoundingClientRect(); obstacles.push({ x: zr.left - 4, y: zr.top - 4, w: zr.width + 8, h: zr.height + 8, id: '_zoom' }); }
+    order.forEach(function (st) {
+      var t = labelEls[st.id], p = screenPos(st.id);
+      var w = st.name.length * fs * 0.6 + 4, h = fs + 4, ok = null;
+      var cands = [{ x: p.x + 10, y: p.y - h / 2, a: 'start' }, { x: p.x - 10 - w, y: p.y - h / 2, a: 'end' }, { x: p.x - w / 2, y: p.y - 12 - h, a: 'middle' }, { x: p.x - w / 2, y: p.y + 10, a: 'middle' }];
+      for (var i = 0; i < cands.length && !ok; i++) {
+        var c = cands[i], box = { x: c.x, y: c.y, w: w, h: h };
+        if (box.x < r.left + 2 || box.x + w > r.right - 2 || box.y < r.top + 2 || box.y + h > r.bottom - 2) continue;
+        var hit = placed.concat(obstacles.filter(function (o) { return o.id !== st.id; })).some(function (o) { return box.x < o.x + o.w && box.x + box.w > o.x && box.y < o.y + o.h && box.y + box.h > o.y; });
+        if (!hit) ok = c;
+      }
+      if (!ok || dimmed(st.id) && placed.length > 3) { t.classList.add('off'); return; }
+      placed.push({ x: ok.x, y: ok.y, w: w, h: h });
+      t.classList.remove('off');
+      var ax = ok.a === 'start' ? ok.x : ok.a === 'end' ? ok.x + w : ok.x + w / 2;
+      t.setAttribute('x', (vb.x + (ax - r.left) * s).toFixed(2));
+      t.setAttribute('y', (vb.y + (ok.y + h - 4 - r.top) * s).toFixed(2));
+      t.setAttribute('text-anchor', ok.a);
+      t.setAttribute('font-size', (fs * s).toFixed(2));
+    });
+  }
+  function animateTo(target) {
+    var to = clamp(fit(target));
+    if (anim) cancelAnimationFrame(anim.raf);
+    if (reduceMQ.matches) { anim = null; setVB(to); return; }
+    var from = { x: vb.x, y: vb.y, w: vb.w, h: vb.h }, t0 = performance.now(), dur = 450;
+    anim = {};
+    (function step(now) {
+      var k = Math.min(1, (now - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setVB({ x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e, w: from.w + (to.w - from.w) * e, h: from.h + (to.h - from.h) * e });
+      if (k < 1) anim.raf = requestAnimationFrame(step); else anim = null;
+    })(t0);
+  }
+  function boxFor(ids) {
+    var xs = ids.map(function (i) { return byId[i].x; }), ys = ids.map(function (i) { return byId[i].y; });
+    var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
+    var w = Math.max(x1 - x0, HOME.w * 0.06), h = Math.max(y1 - y0, HOME.w * 0.06), pad = Math.max(w, h) * 0.35;
+    return { x: (x0 + x1) / 2 - w / 2 - pad, y: (y0 + y1) / 2 - h / 2 - pad, w: w + 2 * pad, h: h + 2 * pad };
+  }
+  function zoomBy(k, cx, cy) {
+    var r = rect();
+    if (cx == null) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+    var ux = vb.x + (cx - r.left) / r.width * vb.w, uy = vb.y + (cy - r.top) / r.height * vb.h;
+    var w = vb.w * k, h = vb.h * k;
+    return { x: ux - (cx - r.left) / r.width * w, y: uy - (cy - r.top) / r.height * h, w: w, h: h };
+  }
+
+  // touch / mouse: one finger pans, two fingers pinch, a still tap opens the nearest stop (26px radius)
+  var pts = {}, g = null;
+  function list() { return Object.keys(pts).map(function (k) { return pts[k]; }); }
+  function nearest(x, y) {
+    var best = null, bd = 26;
+    stops.forEach(function (st) {
+      var p = screenPos(st.id), d = Math.hypot(p.x - x, p.y - y);
+      if (markerEls[st.id].classList.contains('dim')) d += 6; // prefer stops in the current leg
+      if (d <= bd) { bd = d; best = st; }
+    });
+    return best;
+  }
+  svg.addEventListener('pointerdown', function (e) {
+    if (e.button > 0) return;
+    e.preventDefault();
+    try { svg.setPointerCapture(e.pointerId); } catch (x) {}
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var L = list();
+    if (anim) { cancelAnimationFrame(anim.raf); anim = null; }
+    if (L.length === 1) g = { type: 'tap', x0: e.clientX, y0: e.clientY, vb0: { x: vb.x, y: vb.y, w: vb.w, h: vb.h } };
+    else if (L.length === 2) g = { type: 'pinch', d0: Math.hypot(L[0].x - L[1].x, L[0].y - L[1].y) || 1, vb0: { x: vb.x, y: vb.y, w: vb.w, h: vb.h }, m0: { x: (L[0].x + L[1].x) / 2, y: (L[0].y + L[1].y) / 2 } };
+  });
+  svg.addEventListener('pointermove', function (e) {
+    if (!pts[e.pointerId] || !g) return;
+    e.preventDefault();
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var r = rect(), L = list();
+    if ((g.type === 'tap' || g.type === 'pan') && L.length === 1) {
+      var dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+      if (g.type === 'tap' && Math.hypot(dx, dy) > 8) g.type = 'pan';
+      if (g.type === 'pan') setVB({ x: g.vb0.x - dx * g.vb0.w / r.width, y: g.vb0.y - dy * g.vb0.h / r.height, w: g.vb0.w, h: g.vb0.h });
+    } else if (g.type === 'pinch' && L.length === 2) {
+      var d = Math.hypot(L[0].x - L[1].x, L[0].y - L[1].y) || 1, m = { x: (L[0].x + L[1].x) / 2, y: (L[0].y + L[1].y) / 2 };
+      var w = g.vb0.w * g.d0 / d, h = g.vb0.h * g.d0 / d;
+      var ux = g.vb0.x + (g.m0.x - r.left) / r.width * g.vb0.w, uy = g.vb0.y + (g.m0.y - r.top) / r.height * g.vb0.h;
+      setVB({ x: ux - (m.x - r.left) / r.width * w, y: uy - (m.y - r.top) / r.height * h, w: w, h: h });
+    }
+  });
+  function up(e) {
+    if (!pts[e.pointerId]) return;
+    if (g && g.type === 'tap' && list().length === 1 && e.type === 'pointerup') {
+      var st = nearest(e.clientX, e.clientY);
+      if (st) openCard(st.id); else closeCard();
+    }
+    delete pts[e.pointerId];
+    if (!list().length) g = null; else if (g && g.type === 'pinch') g = { type: 'done' };
+  }
+  svg.addEventListener('pointerup', up);
+  svg.addEventListener('pointercancel', up);
+  svg.addEventListener('wheel', function (e) { e.preventDefault(); setVB(zoomBy(Math.exp(e.deltaY * 0.0015), e.clientX, e.clientY)); }, { passive: false });
+  svg.addEventListener('keydown', function (e) {
+    var t = e.target.closest && e.target.closest('.stop');
+    if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCard(t.getAttribute('data-stop')); }
+  });
+  $('#zin').addEventListener('click', function () { animateTo(zoomBy(0.6)); });
+  $('#zout').addEventListener('click', function () { animateTo(zoomBy(1 / 0.6)); });
+  $('#zhome').addEventListener('click', function () { selectLeg('all'); });
+
+  // ---------- legs ----------
+  var legBtns = $$('.leg'), days = $$('.day');
+  function selectLeg(id) {
+    activeLeg = id;
+    legBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-leg') === id)); });
+    var leg = D.legs.filter(function (l) { return l.id === id; })[0];
+    var n = 0;
+    days.forEach(function (d) { var show = id === 'all' || d.getAttribute('data-leg').split(' ').indexOf(id) >= 0; d.hidden = !show; if (show) n++; });
+    $$('.route', svg).forEach(function (p) { p.classList.toggle('dim', id !== 'all' && p.getAttribute('data-leg') !== id); });
+    stops.forEach(function (st) { markerEls[st.id].classList.toggle('dim', id !== 'all' && leg.stops.indexOf(st.id) < 0); });
+    $('#showing').textContent = id === 'all' ? 'Showing all ' + n + ' days' : 'Showing ' + n + ' day' + (n === 1 ? '' : 's') + ' · ' + leg.name;
+    animateTo(id === 'all' ? HOME : boxFor(leg.stops.length ? leg.stops : stops.map(function (s) { return s.id; })));
+  }
+  legBtns.forEach(function (b) { b.addEventListener('click', function () { selectLeg(b.getAttribute('data-leg')); }); });
+
+  // ---------- stop card ----------
+  var sheet = $('#sheet'), body = $('#sheet-body'), openId = null;
+  function openCard(id) {
+    var tpl = document.getElementById('card-' + id);
+    if (!tpl) return;
+    body.innerHTML = '';
+    body.appendChild(tpl.content.cloneNode(true));
+    var h = body.querySelector('h2'); if (h) h.id = 'sheet-title';
+    renderPrices(body);
+    sheet.hidden = false; sheet.scrollTop = 0;
+    if (openId) markerEls[openId].classList.remove('sel');
+    openId = id; markerEls[id].classList.add('sel');
+  }
+  function closeCard() { sheet.hidden = true; if (openId) markerEls[openId].classList.remove('sel'); openId = null; }
+  $('#sheet-close').addEventListener('click', closeCard);
+  sheet.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeCard(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCard(); });
+
+  var rz;
+  window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { setVB(fit(vb)); }, 100); });
+  selectLeg('all');
+  if (anim) { cancelAnimationFrame(anim.raf); anim = null; }
+  setVB(fit(HOME));
+
+  // test hook used by the trip-map checks
+  window.__tripMap = { screenPos: screenPos, idle: function () { return !anim; }, viewBox: function () { return [vb.x, vb.y, vb.w, vb.h]; }, calc: calc };
+})();
+</script>
+</body>
+</html>
